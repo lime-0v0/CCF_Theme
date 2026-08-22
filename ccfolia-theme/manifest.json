@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "CCFOLIA Theme Customizer",
+  "version": "0.27.0",
+  "description": "코코포리아(ccfolia.com)의 다크 테마 색상을 원하는 색으로 커스터마이징합니다.",
+  "permissions": ["storage"],
+  "host_permissions": ["https://ccfolia.com/*"],
+  "content_scripts": [
+    {
+      "matches": ["https://ccfolia.com/*"],
+      "js": ["theme.js", "content.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "CCFOLIA 테마 커스터마이저"
+  }
+}

@@ -1,0 +1,101 @@
+body {
+  width: 260px;
+  margin: 0;
+  padding: 16px;
+  font-family: -apple-system, "Segoe UI", "Malgun Gothic", sans-serif;
+  color: #2b2b33;
+  background: #fdfcff;
+}
+
+h1 {
+  font-size: 15px;
+  margin: 0 0 4px;
+}
+
+.hint {
+  font-size: 12px;
+  color: #6b6875;
+  margin: 0 0 14px;
+}
+
+.presets {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.presets button {
+  flex: 1;
+  padding: 8px 4px;
+  font-size: 12px;
+  border-radius: 4px;
+  border: 1px solid #d8d5e0;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.presets button.active {
+  border-color: #8e4ec6;
+  box-shadow: 0 0 0 1px #8e4ec6 inset;
+  font-weight: 600;
+}
+
+#fieldsWrap {
+  border-top: 1px solid #eee6f2;
+  padding-top: 10px;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.field label {
+  font-size: 13px;
+}
+
+.field input[type="color"] {
+  width: 36px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid #d8d5e0;
+  border-radius: 4px;
+  background: none;
+  cursor: pointer;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+button {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 13px;
+  border-radius: 4px;
+  border: 1px solid #d8d5e0;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+button.primary {
+  background: #8e4ec6;
+  border-color: #8e4ec6;
+  color: #ffffff;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+#status {
+  min-height: 14px;
+  font-size: 12px;
+  color: #6b6875;
+  margin: 10px 0 0;
+}
