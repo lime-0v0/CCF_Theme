@@ -13,9 +13,9 @@ function ccfoliaBuildCSS(theme) {
   const t = Object.assign({}, CCFOLIA_DEFAULT_THEME, theme);
 
   return `
-/* ---- 헤더 / AppBar: 평소엔 반투명, 호버 시 진해짐 ---- */
+/* ---- 헤더 / AppBar: 평소엔 완전히 투명, 호버 시에만 배경이 보임 ---- */
 .MuiAppBar-root {
-  background-color: rgba(${ccfoliaHexToRgb(t.headerBg)}, 0.6) !important;
+  background-color: rgba(${ccfoliaHexToRgb(t.headerBg)}, 0) !important;
   transition: background-color 0.2s ease !important;
 }
 .MuiAppBar-root:hover {
@@ -100,6 +100,12 @@ function ccfoliaBuildCSS(theme) {
   border: 1px solid rgba(${ccfoliaHexToRgb(t.textSecondary)}, 0.3) !important;
   border-radius: 4px !important;
 }
+/* 입력창 안에 실제로 타이핑되는 글자색. 기존엔 래퍼(MuiInputBase-multiline)만
+   손대고 정작 안쪽 <textarea class="MuiInputBase-input">는 그대로 둬서
+   원래 다크 테마의 흰 글자색이 남아 흰 배경에서 타이핑한 내용이 안 보였다. */
+.MuiInputBase-input {
+  color: ${t.textPrimary} !important;
+}
 /* outlined 스타일 입력창은 테두리가 MuiInputBase-root가 아니라
    내부의 fieldset(notchedOutline)에 그려지므로 별도로 색을 지정한다. */
 .MuiOutlinedInput-notchedOutline {
@@ -154,9 +160,17 @@ function ccfoliaBuildCSS(theme) {
   color: ${t.textPrimary} !important;
 }
 
-/* ---- 전송 버튼 ---- */
-[data-testid="SendIcon"] {
-  color: ${t.sendBtn} !important;
+/* ---- 전송 버튼 ----
+   전송 버튼은 아이콘이 아니라 "SEND" 텍스트가 있는 contained 버튼이라
+   [data-testid="SendIcon"]는 애초에 매치되지 않았다. 별도 색을 두지 않고
+   강조색(tabActive)을 그대로 쓴다. */
+.MuiButton-containedPrimary {
+  background-color: ${t.tabActive} !important;
+  color: #fff !important;
+}
+.MuiButton-containedPrimary.Mui-disabled {
+  background-color: rgba(${ccfoliaHexToRgb(t.tabActive)}, 0.4) !important;
+  color: rgba(255, 255, 255, 0.7) !important;
 }
 
 /* ---- HP 게이지 바 (해시 클래스, ccfolia 1.36.3 기준 — 버전업 시 깨질 수 있음) ---- */
