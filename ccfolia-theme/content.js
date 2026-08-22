@@ -100,6 +100,14 @@ function ccfoliaBuildCSS(theme) {
   border: 1px solid rgba(${ccfoliaHexToRgb(t.textSecondary)}, 0.3) !important;
   border-radius: 4px !important;
 }
+/* outlined 스타일 입력창은 테두리가 MuiInputBase-root가 아니라
+   내부의 fieldset(notchedOutline)에 그려지므로 별도로 색을 지정한다. */
+.MuiOutlinedInput-notchedOutline {
+  border-color: rgba(${ccfoliaHexToRgb(t.textSecondary)}, 0.3) !important;
+}
+.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(${ccfoliaHexToRgb(t.textPrimary)}, 0.5) !important;
+}
 
 /* ---- 다이얼로그 내부 아이콘 버튼 ----
    button 태그 전체에 걸면 DELETE/DUPLICATION 같은 의미색 텍스트 버튼까지
@@ -109,12 +117,35 @@ function ccfoliaBuildCSS(theme) {
   color: ${t.textPrimary} !important;
 }
 
-/* ---- 탭 ---- */
+/* ---- 탭 ----
+   MuiTab-textColorPrimary는 비선택 탭 글자색이 흰색(#FFFFFFB3)으로 하드코딩되어 있어
+   (파일 업로드 다이얼로그의 FOREGROUND/CHARACTER/... 탭, 홈 화면의 게임/라이브러리 탭 등)
+   라이트 배경에서 안 보인다. 선택된 탭(.Mui-selected)은 제외하고 어둡게 바꾼다. */
+.MuiTab-textColorPrimary:not(.Mui-selected) {
+  color: ${t.textSecondary} !important;
+}
 .Mui-selected {
   color: ${t.tabActive} !important;
 }
 .MuiTabs-indicator {
   background-color: ${t.tabActive} !important;
+}
+
+/* ---- 구분선 ---- */
+.MuiDivider-root {
+  border-color: rgba(${ccfoliaHexToRgb(t.textSecondary)}, 0.3) !important;
+  background-color: rgba(${ccfoliaHexToRgb(t.textSecondary)}, 0.3) !important;
+}
+
+/* ---- 홈 화면 방 목록 카드 ----
+   카드 배경(원래 어두운색)을 밝게, 방 이름/날짜 텍스트를 어둡게 바꾼다.
+   (예전에는 MuiPaper-elevation6 규칙에서 MuiCard-root를 제외하기만 했지만,
+   텍스트 색까지 같이 바꾸면 대비가 깨지지 않으므로 여기서 함께 처리한다.) */
+.MuiCard-root {
+  background-color: ${t.inputBg} !important;
+}
+.MuiCard-root .MuiTypography-root {
+  color: ${t.textPrimary} !important;
 }
 
 /* ---- 사이드바 / 배경 ---- */
