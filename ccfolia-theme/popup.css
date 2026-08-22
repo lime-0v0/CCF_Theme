@@ -184,6 +184,25 @@ button:active {
   transform: translateY(1px);
 }
 
+#nameBox {
+  margin-top: 8px;
+}
+
+#nameBox input[type="text"] {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 8px;
+  font-size: 13px;
+  border: 1px solid #7c7593;
+  border-radius: 4px;
+  background: #f7f5fa;
+  color: #2b2b33;
+}
+
+#nameBox .actions {
+  margin-top: 8px;
+}
+
 #shareBox {
   margin-top: 8px;
 }

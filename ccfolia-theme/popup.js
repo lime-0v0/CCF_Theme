@@ -13,6 +13,10 @@ const saveCustomBtn = document.getElementById("saveCustom");
 const exportBtn = document.getElementById("exportBtn");
 const importBtn = document.getElementById("importBtn");
 const shareCloseBtn = document.getElementById("shareClose");
+const nameBoxEl = document.getElementById("nameBox");
+const nameInput = document.getElementById("nameInput");
+const nameConfirmBtn = document.getElementById("nameConfirm");
+const nameCancelBtn = document.getElementById("nameCancel");
 
 let currentTheme = Object.assign({}, CCFOLIA_DEFAULT_THEME);
 let customThemes = []; // [{id, name, theme}, ...] 사용자가 저장한 테마 여러 개
@@ -106,6 +110,7 @@ function deleteCustomTheme(id) {
 
 function renderFields() {
   shareBoxEl.classList.add("hidden");
+  nameBoxEl.classList.add("hidden");
 
   const enabled = currentTheme.enabled !== false;
   fieldsWrapEl.style.display = enabled ? "" : "none";
@@ -212,13 +217,21 @@ function loadTheme() {
   );
 }
 
+// 이름 입력은 네이티브 prompt() 대신 팝업 안에 인라인 입력창으로 둔다 --
+// 브라우저 기본 다이얼로그는 스타일도 안 맞고 팝업 포커스 흐름도 깨진다.
 saveCustomBtn.addEventListener("click", () => {
+  shareBoxEl.classList.add("hidden");
+  nameBoxEl.classList.remove("hidden");
+  nameInput.value = `내 테마 ${customThemes.length + 1}`;
+  nameInput.focus();
+  nameInput.select();
+});
+
+function confirmSaveCustom() {
   const defaultName = `내 테마 ${customThemes.length + 1}`;
-  const name = prompt("테마 이름을 입력하세요.", defaultName);
-  if (name === null) return; // 취소
   const entry = {
     id: ccfoliaGenId(),
-    name: name.trim() || defaultName,
+    name: nameInput.value.trim() || defaultName,
     theme: Object.assign({}, currentTheme),
   };
   customThemes.push(entry);
@@ -226,10 +239,23 @@ saveCustomBtn.addEventListener("click", () => {
     renderPresets();
     showStatus("테마로 저장되었습니다.");
   });
+  nameBoxEl.classList.add("hidden");
+}
+
+nameConfirmBtn.addEventListener("click", confirmSaveCustom);
+nameCancelBtn.addEventListener("click", () => nameBoxEl.classList.add("hidden"));
+nameInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    confirmSaveCustom();
+  } else if (e.key === "Escape") {
+    nameBoxEl.classList.add("hidden");
+  }
 });
 
 exportBtn.addEventListener("click", () => {
   const json = ccfoliaExportTheme(currentTheme);
+  nameBoxEl.classList.add("hidden");
   shareBoxEl.classList.remove("hidden");
   shareArea.readOnly = true;
   shareArea.value = json;
@@ -249,6 +275,7 @@ exportBtn.addEventListener("click", () => {
 });
 
 importBtn.addEventListener("click", () => {
+  nameBoxEl.classList.add("hidden");
   shareBoxEl.classList.remove("hidden");
   shareArea.readOnly = false;
   shareArea.value = "";
