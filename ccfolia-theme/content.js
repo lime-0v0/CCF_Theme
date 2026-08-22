@@ -145,6 +145,16 @@ body {
   background-color: rgba(${ccfoliaHexToRgb(t.sidebarBg)}, 0.9) !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18) !important;
 }
+/* ---- 이 패널들 안의 항목 이름(캐릭터 목록의 "캐릭터", 마커 목록의 이름 등) ----
+   MuiListItemText-primary는 채팅 메시지 발신자명에도 쓰는 클래스라 전역으로는
+   손대지 않지만(위 "채팅 메시지 발신자명" 참고 — 공유 데이터라 사용자마다
+   다르게 보이면 안 됨), 채팅 드로어는 MuiPaper-elevation6가 아니라서 이렇게
+   스코프를 좁히면 채팅 색상은 그대로 두고 이 목록 패널들만 고칠 수 있다.
+   손대지 않았을 땐 사이트가 흰 글자색을 하드코딩해둬서, 우리 밝은 패널
+   배경 위에서 대비가 거의 사라졌다(개발자 도구 접근성 검사 기준 1.17:1). */
+.MuiPaper-elevation6:not(.MuiCard-root) .MuiListItemText-primary {
+  color: ${t.textPrimary} !important;
+}
 /* ---- 채팅 하단 컴포즈 패널(.sc-bA-DSAS)만은 완전 불투명한 흰색으로 ----
    헤더/탭바/주사위 아이콘 줄/Dicebot engine 표기가 전부 이 패널 위에
    얹혀 있는데, 패널이 반투명이면 뒤에 비치는(어두울 수 있는) 보드 배경과
