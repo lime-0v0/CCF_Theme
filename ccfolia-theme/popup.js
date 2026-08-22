@@ -227,6 +227,14 @@ saveCustomBtn.addEventListener("click", () => {
   nameInput.select();
 });
 
+// 패널을 닫을 때는 그 패널을 연 버튼으로 포커스를 되돌린다 -- 안 그러면
+// 화면에 안 보이는(hidden) 요소에 포커스가 남아 키보드/스크린리더
+// 사용자가 지금 뭐가 선택된 상태인지 알 수 없게 된다.
+function closeNameBox() {
+  nameBoxEl.classList.add("hidden");
+  saveCustomBtn.focus();
+}
+
 function confirmSaveCustom() {
   const defaultName = `내 테마 ${customThemes.length + 1}`;
   const entry = {
@@ -239,21 +247,24 @@ function confirmSaveCustom() {
     renderPresets();
     showStatus("테마로 저장되었습니다.");
   });
-  nameBoxEl.classList.add("hidden");
+  closeNameBox();
 }
 
 nameConfirmBtn.addEventListener("click", confirmSaveCustom);
-nameCancelBtn.addEventListener("click", () => nameBoxEl.classList.add("hidden"));
+nameCancelBtn.addEventListener("click", closeNameBox);
 nameInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
     e.preventDefault();
     confirmSaveCustom();
   } else if (e.key === "Escape") {
-    nameBoxEl.classList.add("hidden");
+    closeNameBox();
   }
 });
 
+let shareTrigger = null; // 내보내기/가져오기 중 무엇이 shareBox를 열었는지 기억해뒀다가 닫을 때 포커스를 돌려준다
+
 exportBtn.addEventListener("click", () => {
+  shareTrigger = exportBtn;
   const json = ccfoliaExportTheme(currentTheme);
   nameBoxEl.classList.add("hidden");
   shareBoxEl.classList.remove("hidden");
@@ -275,6 +286,7 @@ exportBtn.addEventListener("click", () => {
 });
 
 importBtn.addEventListener("click", () => {
+  shareTrigger = importBtn;
   nameBoxEl.classList.add("hidden");
   shareBoxEl.classList.remove("hidden");
   shareArea.readOnly = false;
@@ -285,6 +297,7 @@ importBtn.addEventListener("click", () => {
 
 shareCloseBtn.addEventListener("click", () => {
   shareBoxEl.classList.add("hidden");
+  (shareTrigger || exportBtn).focus();
 });
 
 shareArea.addEventListener("keydown", (e) => {
