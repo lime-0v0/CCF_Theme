@@ -1,10 +1,14 @@
 body {
-  width: 260px;
+  width: 300px;
   margin: 0;
   padding: 16px;
   font-family: -apple-system, "Segoe UI", "Malgun Gothic", sans-serif;
   color: #2b2b33;
   background: #fdfcff;
+}
+
+.hidden {
+  display: none !important;
 }
 
 h1 {
@@ -18,26 +22,100 @@ h1 {
   margin: 0 0 16px;
 }
 
+/* flex + hardcoded width(61px) 조합으로 기본 프리셋과 "내 테마" 칩 너비를
+   맞추려 했는데, 한쪽은 브라우저의 flex 계산값, 다른 한쪽은 내가 손으로
+   구한 숫자라 서로 다른 계산 경로라서 서브픽셀 단위로 어긋났다. 대신 두
+   줄 다 grid-template-columns: repeat(4, 1fr)을 쓰게 하면 컬럼 폭이 완전히
+   똑같은 공식으로 계산되어 항상 정확히 일치한다 -- 프리셋 개수가
+   바뀌어도(항상 4개 기준 그리드) 다시 계산할 필요가 없다. */
 .presets {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   gap: 8px;
   margin-bottom: 16px;
 }
 
+/* 세로 길이를 고정값으로 못박는다 -- 안 그러면 이름이 길어서 줄바꿈 없이
+   혼자 다음 줄로 넘어가는 칩(내용 기준 높이만 적용됨)이 같은 줄에 있는
+   칩들과 다른 높이로 보일 수 있다. box-sizing: border-box라 padding/border
+   를 포함해서 정확히 32px가 된다. */
 .presets button {
-  flex: 1;
-  padding: 8px 4px;
+  box-sizing: border-box;
+  min-width: 0;
+  height: 32px;
+  padding: 0 4px;
   font-size: 12px;
   border-radius: 4px;
   border: 1px solid #7c7593;
   background: #f7f5fa;
   cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .presets button.active {
   border-color: #8e4ec6;
   box-shadow: 0 0 0 1px #8e4ec6 inset;
   font-weight: 600;
+}
+
+/* 프리셋 버튼은 배경/글자색을 그 테마의 실제 색(JS에서 inline style로 설정)
+   으로 미리보기 처리한다. 인라인 style이 :hover의 background보다 우선하므로
+   background가 아니라 filter로 호버 피드백을 줘야 미리보기 색 위에서도
+   먹힌다. */
+.presets button:hover {
+  filter: brightness(0.95);
+}
+
+.presetDivider {
+  border: none;
+  border-top: 1px solid #eee6f2;
+  margin: 0 0 12px;
+}
+
+/* 커스텀 테마가 4개를 넘으면 grid-auto-flow(기본값 row)가 알아서 다음
+   줄로 넘긴다 -- 그 줄도 똑같은 repeat(4, 1fr) 템플릿을 쓰니 위 기본
+   프리셋 줄과 컬럼이 그대로 정렬된다. 줄바꿈 안 되는 긴 이름(숫자 나열
+   등)이 셀 폭을 뚫고 넘치지 않도록 min-width: 0으로 grid 아이템의 자동
+   최소 크기(콘텐츠 크기) 규칙을 꺼야 안쪽 button의 text-overflow:
+   ellipsis가 실제로 먹는다. */
+.presetChip {
+  position: relative;
+  min-width: 0;
+}
+
+.presetChip button {
+  width: 100%;
+}
+
+/* 삭제 버튼이 칩 밖으로 튀어나오면(음수 offset) 버튼 자체는 기본 프리셋과
+   같은 컬럼 폭이어도 실제 차지하는 시각적 폭은 그보다 커져서 "같은 크기"라고
+   할 수 없게 된다. top/right를 양수로 둬서 칩 박스 안쪽에 완전히 들어가게
+   하고, 옆 칩과 절대 안 겹치게 크기도 14px로 줄인다. */
+.presetChip .chipDelete {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 14px;
+  height: 14px;
+  flex: none;
+  padding: 0;
+  line-height: 12px;
+  font-size: 10px;
+  border-radius: 50%;
+  border: 1px solid #7c7593;
+  background: #fdfcff;
+  color: #6b6875;
+  opacity: 0.85;
+}
+
+.presetChip .chipDelete:hover {
+  background: #d64550;
+  border-color: #d64550;
+  color: #ffffff;
+  opacity: 1;
+  filter: none;
 }
 
 #fieldsWrap {
@@ -48,13 +126,24 @@ h1 {
 .field {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 8px;
   margin-bottom: 8px;
 }
 
 .field label {
+  flex: 1;
+  min-width: 0;
   font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.swatchGroup {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
 .field input[type="color"] {
@@ -65,6 +154,19 @@ h1 {
   border-radius: 4px;
   background: none;
   cursor: pointer;
+}
+
+.field input.hex {
+  width: 76px;
+  height: 26px;
+  box-sizing: border-box;
+  padding: 0 6px;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+  border: 1px solid #7c7593;
+  border-radius: 4px;
+  background: #f7f5fa;
+  color: #2b2b33;
 }
 
 .actions {
@@ -102,9 +204,71 @@ button:active {
   transform: translateY(1px);
 }
 
+#nameBox {
+  margin-top: 8px;
+}
+
+#nameBox input[type="text"] {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 8px;
+  font-size: 13px;
+  border: 1px solid #7c7593;
+  border-radius: 4px;
+  background: #f7f5fa;
+  color: #2b2b33;
+}
+
+#nameBox .actions {
+  margin-top: 8px;
+}
+
+#shareBox {
+  margin-top: 8px;
+}
+
+#shareBox textarea {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 11px;
+  padding: 6px;
+  border: 1px solid #7c7593;
+  border-radius: 4px;
+  background: #f7f5fa;
+  color: #2b2b33;
+  resize: none;
+  margin-bottom: 8px;
+}
+
 #status {
   min-height: 14px;
   font-size: 12px;
   color: #6b6875;
   margin: 12px 0 0;
+}
+
+#status a {
+  color: #8e4ec6;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+#status a:hover {
+  color: #7d3fb3;
+}
+
+.footer {
+  text-align: center;
+  font-size: 11px;
+  margin: 8px 0 0;
+}
+
+.footer a {
+  color: #6b6875;
+  text-decoration: underline;
+}
+
+.footer a:hover {
+  color: #8e4ec6;
 }

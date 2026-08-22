@@ -102,12 +102,31 @@ body {
 }
 
 /* ---- 보드(맵) 위 오버레이 텍스트: 이름표 / HP / 말풍선 ---- */
-/* 흰색 halo(text-shadow)를 줬었는데, 이 셀렉터가 board 위 라벨만이 아니라
-   body1/body2.noWrap을 쓰는 다른 일반 텍스트에도 걸려서 원치 않는 그림자
-   효과가 생겼다. 그림자는 빼고 색만 유지한다. */
+/* 예전엔 흰색 halo(text-shadow)를 줬다가, 이 셀렉터가 board 위 라벨만이
+   아니라 body1/body2.noWrap을 쓰는 다른 일반 텍스트에도 걸려서 원치 않는
+   그림자 효과가 생겨 완전히 뺐었다. 근데 그러면 HP 게이지처럼 텍스트
+   바로 밑 배경이 계속 바뀌는 곳에서 글자색과 배경색이 우연히 비슷해지면
+   (예: 다크 프리셋의 밝은 글자가 HP 게이지의 밝은 부분과 겹칠 때) 글자가
+   그대로 안 보인다. 다시 넣되, 흐릿하게 번지는 shadow 대신 딱 붙는
+   -webkit-text-stroke로 바꿔서 다른 일반 텍스트에 걸려도 티가 덜 나게
+   한다. 테두리 색은 textPrimary의 명도를 보고 자동으로 반대쪽(밝으면
+   어둡게, 어두우면 밝게)을 골라서, 프리셋이 뭐든 항상 배경과 대비가
+   생기게 한다. paint-order: stroke fill이라 테두리 중 안쪽 절반은 글자
+   채우기에 덮여 실제로는 stroke-width의 절반만 밖으로 보인다 — 처음엔
+   0.6px를 썼는데 그럼 보이는 두께가 0.3px라 예전 halo(약 1px)보다 훨씬
+   얇았다. 1.6px로 키워서 보이는 두께를 halo와 비슷하게 맞췄다.
+   HP/MP 라벨과 수치(예: .cyGeBV 같은 해시 클래스)는 ccfolia 자체가 이미
+   흰색 text-shadow halo를 하드코딩해뒀다 — text-shadow와
+   -webkit-text-stroke는 서로 다른 속성이라 우리가 stroke만 줘서는 저
+   흰색 halo를 안 지우고 그 위에 겹치기만 한다. 다크 프리셋처럼 우리
+   글자색도 밝은 경우, "흰 글자 + 흰 halo"가 겹쳐 그대로 안 보이는 문제가
+   생겼다. text-shadow를 꺼서 halo를 우리 stroke로 완전히 대체한다. */
 .MuiTypography-body2.MuiTypography-noWrap,
 .MuiTypography-body1 {
   color: ${t.textPrimary} !important;
+  text-shadow: none !important;
+  -webkit-text-stroke: 1.6px ${ccfoliaAutoOutlineColor(t.textPrimary)} !important;
+  paint-order: stroke fill !important;
 }
 
 /* ---- 채팅 메시지 발신자명, 주사위 판정 결과 색상(BCDice) — 손대지 않음 ----
@@ -144,6 +163,16 @@ body {
 .MuiPaper-elevation6:not(.MuiCard-root) {
   background-color: rgba(${ccfoliaHexToRgb(t.sidebarBg)}, 0.9) !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18) !important;
+}
+/* ---- 이 패널들 안의 항목 이름(캐릭터 목록의 "캐릭터", 마커 목록의 이름 등) ----
+   MuiListItemText-primary는 채팅 메시지 발신자명에도 쓰는 클래스라 전역으로는
+   손대지 않지만(위 "채팅 메시지 발신자명" 참고 — 공유 데이터라 사용자마다
+   다르게 보이면 안 됨), 채팅 드로어는 MuiPaper-elevation6가 아니라서 이렇게
+   스코프를 좁히면 채팅 색상은 그대로 두고 이 목록 패널들만 고칠 수 있다.
+   손대지 않았을 땐 사이트가 흰 글자색을 하드코딩해둬서, 우리 밝은 패널
+   배경 위에서 대비가 거의 사라졌다(개발자 도구 접근성 검사 기준 1.17:1). */
+.MuiPaper-elevation6:not(.MuiCard-root) .MuiListItemText-primary {
+  color: ${t.textPrimary} !important;
 }
 /* ---- 채팅 하단 컴포즈 패널(.sc-bA-DSAS)만은 완전 불투명한 흰색으로 ----
    헤더/탭바/주사위 아이콘 줄/Dicebot engine 표기가 전부 이 패널 위에

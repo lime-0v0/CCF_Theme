@@ -10,17 +10,42 @@
   <p class="hint">색상을 고르면 ccfolia 탭에 바로 반영되고 자동 저장됩니다.</p>
 
   <div id="presets" class="presets"></div>
+  <hr id="presetDivider" class="presetDivider hidden" />
+  <div id="customPresets" class="presets hidden"></div>
 
   <div id="fieldsWrap">
-    <p class="hint">아래에서 세부적으로 조정할 수 있어요.</p>
+    <p class="hint">아래에서 세부적으로 조정할 수 있어요. (HEX 코드 직접 입력 가능)</p>
     <div id="fields"></div>
   </div>
 
-  <div class="actions">
-    <button id="saveCustom" type="button">내 테마로 저장</button>
+  <div id="shareWrap">
+    <div class="actions">
+      <button id="saveCustom" type="button">+ 새 테마 저장</button>
+    </div>
+    <div id="nameBox" class="hidden">
+      <input type="text" id="nameInput" maxlength="12" placeholder="테마 이름 (최대 12자)" aria-label="테마 이름" />
+      <div class="actions">
+        <button id="nameConfirm" type="button" class="primary">저장</button>
+        <button id="nameCancel" type="button">취소</button>
+      </div>
+    </div>
+    <div class="actions">
+      <button id="exportBtn" type="button">내보내기</button>
+      <button id="importBtn" type="button">가져오기</button>
+    </div>
+    <div id="shareBox" class="hidden">
+      <textarea id="shareArea" rows="2" aria-label="테마 코드"></textarea>
+      <div class="actions">
+        <button id="shareClose" type="button">닫기</button>
+      </div>
+    </div>
   </div>
 
   <p id="status" role="status"></p>
+
+  <p class="footer">
+    <a href="https://github.com/lime-0v0/CCF_Theme/issues" target="_blank" rel="noopener noreferrer">버그 제보 · 의견 남기기</a>
+  </p>
 
   <script src="theme.js"></script>
   <script src="popup.js"></script>
