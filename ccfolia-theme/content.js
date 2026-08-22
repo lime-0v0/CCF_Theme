@@ -162,17 +162,23 @@ body {
 
 /* ---- 입력 필드(캐릭터 이름 칸 + 메시지 입력창): 패널보다 살짝 어둡게 ----
    원본 다크 테마도 탭바/패널은 한 톤이고, 캐릭터 이름 칸과 메시지 입력창만
-   그보다 살짝 진한("들어간") 톤을 쓴다. 검정 반투명 오버레이를 얹으면
-   sidebarBg로 어떤 색을 고르든 항상 패널보다 살짝 어둡게 유지된다.
-   (한 번 투명하게 뺐었는데, 어둡던 진짜 원인은 이게 아니라 주변 테두리
-   쪽이었다고 해서 다시 되돌림.)
+   그보다 살짝 진한("들어간") 톤을 쓴다.
+   rgba(0,0,0,0.05) 같은 반투명 오버레이는 뒤에 있는 요소의 배경에 따라
+   최종 색이 달라진다 — 이름 칸과 메시지 입력창이 서로 다른 조상 안에
+   있어서 같은 반투명값을 줘도 다르게 보였다. 대신 sidebarBg 자체를 고정
+   비율로 어둡게 계산한 불투명 색(ccfoliaDarken)을 써서 어디에 있든 항상
+   똑같은 색이 나오게 한다. 그 전에 메시지 입력창을 감싸는 조상
+   (.sc-kJNpLD)도 먼저 sidebarBg로 고정해서 배경이 일정하게 유지되게 한다.
    MuiInputBase-root 전체에 걸면 밑줄 스타일 필드까지 박스로 바뀌므로
    MuiInputBase-multiline으로 스코프를 좁힌다.
-   .sc-hfVCuV(캐릭터 이름 칸)는 안정적인 Mui 클래스가 없어 해시 클래스를
-   쓴다 — ccfolia 버전업 시 깨질 수 있음. */
+   .sc-hfVCuV(캐릭터 이름 칸)/.sc-kJNpLD(메시지 입력창 조상)는 안정적인
+   Mui 클래스가 없어 해시 클래스를 쓴다 — ccfolia 버전업 시 깨질 수 있음. */
+.sc-kJNpLD {
+  background-color: ${t.sidebarBg} !important;
+}
 .MuiInputBase-multiline,
 .sc-hfVCuV {
-  background-color: rgba(0, 0, 0, 0.05) !important;
+  background-color: ${ccfoliaDarken(t.sidebarBg, 0.95)} !important;
 }
 /* 입력창 안에 실제로 타이핑되는 글자색. 기존엔 래퍼(MuiInputBase-multiline)만
    손대고 정작 안쪽 <textarea class="MuiInputBase-input">는 그대로 둬서

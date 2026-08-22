@@ -32,3 +32,16 @@ function ccfoliaHexToRgb(hex) {
   const b = parseInt(m[3], 16);
   return `${r}, ${g}, ${b}`;
 }
+
+// rgba로 살짝 어둡게 하면 뒤에 무엇이 비치느냐에 따라 최종 색이 미묘하게
+// 달라진다(부모마다 배경이 조금씩 다르면 같은 rgba(0,0,0,0.05)도 다르게
+// 보임). 대신 sidebarBg 자체를 고정된 비율로 어둡게 한 "불투명" 색을
+// 계산해서 어디에 놓이든 항상 같은 색이 나오게 한다.
+function ccfoliaDarken(hex, factor) {
+  const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex || "");
+  if (!m) return hex;
+  const r = Math.round(parseInt(m[1], 16) * factor);
+  const g = Math.round(parseInt(m[2], 16) * factor);
+  const b = Math.round(parseInt(m[3], 16) * factor);
+  return `rgb(${r}, ${g}, ${b})`;
+}
