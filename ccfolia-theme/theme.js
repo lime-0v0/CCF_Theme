@@ -2,6 +2,9 @@
 "use strict";
 
 const CCFOLIA_STORAGE_KEY = "ccfoliaTheme";
+// 사용자가 직접 만든 색 조합을 프리셋처럼 저장해두는 별도 슬롯.
+// (없으면 popup에서 "내 테마" 버튼 자체가 안 나온다.)
+const CCFOLIA_CUSTOM_STORAGE_KEY = "ccfoliaCustomTheme";
 
 // 전송 버튼은 별도 색을 두지 않고 tabActive(강조색)를 그대로 쓴다.
 // 헤더/입력창/사이드바/패널/카드는 전부 sidebarBg 하나를 공유한다(원래 다크
