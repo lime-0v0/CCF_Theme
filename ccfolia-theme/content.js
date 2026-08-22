@@ -143,6 +143,15 @@ body {
   background-color: rgba(${ccfoliaHexToRgb(t.sidebarBg)}, 0.9) !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18) !important;
 }
+/* ---- 채팅 하단 컴포즈 패널(.sc-bA-DSAS)만은 완전 불투명한 흰색으로 ----
+   헤더/탭바/주사위 아이콘 줄/Dicebot engine 표기가 전부 이 패널 위에
+   얹혀 있는데, 패널이 반투명이면 뒤에 비치는(어두울 수 있는) 보드 배경과
+   섞여서 흰색이 아니라 회색으로 보인다. 이 패널만은 순백을 원해서
+   반투명을 끄고 완전 불투명하게 한다. (다른 떠있는 패널들은 위 규칙대로
+   계속 반투명 유지.) */
+.sc-bA-DSAS {
+  background-color: ${t.sidebarBg} !important;
+}
 
 /* ---- 입력 필드(캐릭터 이름 칸 + 메시지 입력창): 패널보다 살짝 어둡게 ----
    원본 다크 테마도 탭바/패널은 한 톤이고, 캐릭터 이름 칸과 메시지 입력창만
