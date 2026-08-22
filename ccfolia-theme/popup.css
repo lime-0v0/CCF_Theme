@@ -22,8 +22,15 @@ h1 {
   margin: 0 0 16px;
 }
 
+/* flex + hardcoded width(61px) 조합으로 기본 프리셋과 "내 테마" 칩 너비를
+   맞추려 했는데, 한쪽은 브라우저의 flex 계산값, 다른 한쪽은 내가 손으로
+   구한 숫자라 서로 다른 계산 경로라서 서브픽셀 단위로 어긋났다. 대신 두
+   줄 다 grid-template-columns: repeat(4, 1fr)을 쓰게 하면 컬럼 폭이 완전히
+   똑같은 공식으로 계산되어 항상 정확히 일치한다 -- 프리셋 개수가
+   바뀌어도(항상 4개 기준 그리드) 다시 계산할 필요가 없다. */
 .presets {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   gap: 8px;
   margin-bottom: 16px;
 }
@@ -33,8 +40,8 @@ h1 {
    칩들과 다른 높이로 보일 수 있다. box-sizing: border-box라 padding/border
    를 포함해서 정확히 32px가 된다. */
 .presets button {
-  flex: 1;
   box-sizing: border-box;
+  min-width: 0;
   height: 32px;
   padding: 0 4px;
   font-size: 12px;
@@ -67,34 +74,25 @@ h1 {
   margin: 0 0 12px;
 }
 
-#customPresets {
-  flex-wrap: wrap;
-}
-
-/* 이름 길이에 상관없이 항상 같은 너비로 고정한다. flex: 0 1 auto +
-   min-width만 쓰면(예전 방식) 줄바꿈이 안 되는 긴 글자(예: 숫자 나열)에서
-   flex 아이템의 "자동 최소 크기"가 내용 크기를 따라가버려서 팝업 폭을
-   뚫고 넘쳐버렸다. width를 고정값으로 못박아야 안쪽 button의
-   text-overflow: ellipsis가 실제로 먹는다.
-   61px = 기본 프리셋 4개(기본/다크/화이트/세피아) 버튼 한 개의 실제 너비와
-   똑같은 값이다: (팝업 폭 300 - 좌우 패딩 32 - gap 3*8) / 4개 = 61px.
-   "내 테마" 칩도 같은 종류의 컴포넌트(테마 선택 버튼)이므로 크기가 달라지면
-   안 된다 -- 이 값은 하드코딩이라, 프리셋 개수/팝업 폭/패딩/gap 중 하나라도
-   바뀌면 이 숫자도 같이 recalculate 해야 한다. */
+/* 커스텀 테마가 4개를 넘으면 grid-auto-flow(기본값 row)가 알아서 다음
+   줄로 넘긴다 -- 그 줄도 똑같은 repeat(4, 1fr) 템플릿을 쓰니 위 기본
+   프리셋 줄과 컬럼이 그대로 정렬된다. 줄바꿈 안 되는 긴 이름(숫자 나열
+   등)이 셀 폭을 뚫고 넘치지 않도록 min-width: 0으로 grid 아이템의 자동
+   최소 크기(콘텐츠 크기) 규칙을 꺼야 안쪽 button의 text-overflow:
+   ellipsis가 실제로 먹는다. */
 .presetChip {
   position: relative;
-  width: 61px;
-  flex: 0 0 auto;
+  min-width: 0;
 }
 
 .presetChip button {
   width: 100%;
 }
 
-/* 삭제 버튼이 칩 밖으로 튀어나오면(음수 offset) 버튼 자체는 61px여도 실제
-   차지하는 시각적 폭은 그보다 커져서, 기본 프리셋 버튼과 "같은 크기"라고
-   할 수 없게 된다. top/right를 양수로 둬서 칩의 61x32 박스 안쪽에 완전히
-   들어가게 하고, 옆 칩과 절대 안 겹치게 크기도 14px로 줄인다. */
+/* 삭제 버튼이 칩 밖으로 튀어나오면(음수 offset) 버튼 자체는 기본 프리셋과
+   같은 컬럼 폭이어도 실제 차지하는 시각적 폭은 그보다 커져서 "같은 크기"라고
+   할 수 없게 된다. top/right를 양수로 둬서 칩 박스 안쪽에 완전히 들어가게
+   하고, 옆 칩과 절대 안 겹치게 크기도 14px로 줄인다. */
 .presetChip .chipDelete {
   position: absolute;
   top: 2px;
