@@ -23,26 +23,16 @@ body {
   background-color: ${t.sidebarBg} !important;
 }
 
-/* ---- 룸 전체 배경 이미지 레이어(.sc-jCPQUC > .sc-bKoKAZ) ----
-   방 표지 이미지를 화면 전체에 깔아주는 장식용 배경 레이어. .sc-jCPQUC에
-   boardBg를 줘도 여전히 뿌옇게 보인다는 리포트가 있어서, 아예 이미지가
-   있을 때는 손대지 않고(.sc-bKoKAZ가 실제 url을 가진 배경 이미지를 그리고
-   있을 때) 이미지가 없을 때만 boardBg를 채우도록 바꾼다. :has()로 자식의
-   인라인 style에 "url("가 있는지로 판단한다(Chrome 105+ 필요). */
-.sc-jCPQUC:not(:has([style*="background-image: url("])) {
-  background-color: ${t.boardBg} !important;
-}
-
-/* ---- 룸(보드) 배경 (해시 클래스, ccfolia 1.36.3 기준 — 버전업 시 깨질 수 있음) ----
-   헤더/패널과는 분리된 별도 색(boardBg). 씬이 없을 때 보이는 격자는 반투명
-   흰 선(rgba(255,255,255,0.1))만 inline style로 그려져 있고 그 자체는 배경이
-   투명이라 부모 배경을 그대로 물려받는다. 씬 이미지를 직접 감싸는
-   .sc-eVedOh는 건드리지 않고(이미지가 살짝 어둡게 뜨는 현상이 있었음),
-   훨씬 바깥의 뷰포트 컨테이너(.sc-jcsPWJ)만 채운다 — 씬 이미지/토큰과
-   실제로 겹치지 않는 여백 부분에만 영향을 준다. */
-.sc-jcsPWJ {
-  background-color: ${t.boardBg} !important;
-}
+/* ---- 룸 배경(보드/씬) — 의도적으로 배경색을 칠하지 않는다 ----
+   룸에는 항상 방 표지 사진을 blur(8px) 처리한 장식용 배경 레이어
+   (.sc-jCPQUC > .sc-bKoKAZ, ccfolia 자체 CSS)가 깔려 있다. 씬이 없을 때
+   보이는 "빈 보드"는 원래 이 블러 처리된 사진이 그대로 비쳐 보이는
+   화면이지, 플랫한 단색이 아니었다.
+   예전에 .sc-eVedOh → .sc-jCPQUC → .sc-jcsPWJ 순서로 이것저것 배경색을
+   시도했는데, 실제 문제는 .sc-jcsPWJ(보드 뷰포트 바깥 컨테이너)에 준
+   boardBg 단색 채우기가 이 블러 배경 사진을 그냥 덮어버리고 있었던 거였다.
+   그래서 이 요소들엔 배경색을 아예 주지 않는다 — 씬 이미지가 있으면
+   이미지가, 없으면 ccfolia 자체 블러 배경이 자연스럽게 비치게 둔다. */
 
 /* ---- 상단 고정 헤더(AppBar, positionFixed): 평소엔 완전히 투명, 호버 시에만 배경 ----
    .MuiAppBar-root는 이 헤더 말고도 채팅 드로어 내부 헤더(positionSticky)와

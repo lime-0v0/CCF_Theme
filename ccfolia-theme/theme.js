@@ -5,15 +5,15 @@ const CCFOLIA_STORAGE_KEY = "ccfoliaTheme";
 
 // 전송 버튼은 별도 색을 두지 않고 tabActive(강조색)를 그대로 쓴다.
 // 헤더/입력창/사이드바/패널/카드는 전부 sidebarBg 하나를 공유한다(원래 다크
-// 테마도 그랬음). 룸(보드) 배경은 거기서 분리해서 boardBg로 따로 둔다 —
-// ccfolia.com/home처럼 보드가 없는 화면에서는 body 배경이 곧 sidebarBg라
-// 자연히 헤더/패널과 같은 색이 되고, 룸 화면의 보드 배경은 boardBg를 쓴다.
+// 테마도 그랬음). ccfolia.com/home처럼 보드가 없는 화면에서는 body 배경이
+// 곧 sidebarBg라 자연히 헤더/패널과 같은 색이 된다.
+// 룸(보드) 배경은 일부러 색을 안 준다 — 룸에는 항상 방 표지 사진을 블러
+// 처리한 배경 레이어가 깔려 있어서, 우리가 단색을 덮으면 그 사진을 가려버린다.
 const CCFOLIA_DEFAULT_THEME = {
   sidebarBg: "#FDFCFF",
   textPrimary: "#2B2B33",
   textSecondary: "#6B6875",
   tabActive: "#8E4EC6",
-  boardBg: "#111111",
 };
 
 // 팝업에서 색상 선택기 라벨/순서를 정의할 때도 이 배열을 공유해서 쓴다.
@@ -22,7 +22,6 @@ const CCFOLIA_THEME_FIELDS = [
   { key: "textPrimary", label: "기본 텍스트" },
   { key: "textSecondary", label: "보조 텍스트" },
   { key: "tabActive", label: "활성 탭 / 강조색 (전송 버튼도 이 색을 씀)" },
-  { key: "boardBg", label: "룸(보드) 배경" },
 ];
 
 function ccfoliaHexToRgb(hex) {
