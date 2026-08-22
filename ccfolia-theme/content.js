@@ -13,11 +13,16 @@ function ccfoliaBuildCSS(theme) {
   const t = Object.assign({}, CCFOLIA_DEFAULT_THEME, theme);
 
   return `
-/* ---- (되돌림) body/html 배경색 강제 지정 ----
-   보드에 씬이 없을 때 보이는 격자 무늬가 body의 어두운 배경과 겹쳐서 만들어지는
-   효과였는데, body를 밝은 색으로 덮어버리면서 격자가 (거의) 안 보이게 됐고,
-   덩달아 헤더가 평소엔 투명하다가 호버 시 밝아지는 효과도 배경과 색이 비슷해져서
-   티가 안 났다. 원래대로 body는 건드리지 않는다. */
+/* ---- 페이지 기본 배경 (룸 목록 화면, 씬이 없는 보드 뒤편 등) ----
+   MUI CssBaseline이 body에 다크 배경색을 깔아두는데, 이걸 안 바꾸면 다이얼로그/
+   카드/패널처럼 구체적인 컴포넌트 바깥의 빈 공간은 계속 어둡게 남는다.
+   (부작용: 씬이 없을 때 보이는 보드 격자무늬가 이 어두운 배경과의 대비로
+   보이던 거라 같이 옅어진다 — 격자무늬 자체는 별도 규칙으로 다시 어둡게 채워야 함,
+   아직 어떤 요소인지 확인 전이라 미해결.) */
+html,
+body {
+  background-color: ${t.headerBg} !important;
+}
 
 /* ---- 헤더 / AppBar: 평소엔 완전히 투명, 호버 시에만 배경이 보임 ---- */
 .MuiAppBar-root {
@@ -193,6 +198,15 @@ function ccfoliaBuildCSS(theme) {
 .MuiButton-containedPrimary.Mui-disabled {
   background-color: rgba(${ccfoliaHexToRgb(t.tabActive)}, 0.4) !important;
   color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* ---- 보드 위 캐릭터 토큰 호버 그림자 (해시 클래스, ccfolia 1.36.3 기준 — 버전업 시 깨질 수 있음) ----
+   토큰 이미지에 안정적인 Mui 클래스가 없어 HP 게이지 바와 같은 예외로 처리한다. */
+.sc-eKaOtw {
+  transition: filter 0.15s ease !important;
+}
+.sc-eKaOtw:hover {
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.45)) !important;
 }
 
 /* ---- HP 게이지 바 (해시 클래스, ccfolia 1.36.3 기준 — 버전업 시 깨질 수 있음) ---- */
