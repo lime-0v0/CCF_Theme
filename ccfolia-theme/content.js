@@ -32,6 +32,13 @@ body {
 .sc-eVedOh {
   background-color: ${t.boardBg} !important;
 }
+/* .sc-eVedOh는 팬/줌으로 이동하는 보드 콘텐츠 박스라 화면 전체를 덮지
+   않을 때가 있다(뷰포트보다 작거나 다른 위치로 이동한 경우). 뷰포트 자체를
+   감싸는 바깥 컨테이너(.sc-jcsPWJ)도 같이 채워서 어느 경우에도 흰 여백이
+   남지 않게 한다. */
+.sc-jcsPWJ {
+  background-color: ${t.boardBg} !important;
+}
 
 /* ---- 상단 고정 헤더(AppBar, positionFixed): 평소엔 완전히 투명, 호버 시에만 배경 ----
    .MuiAppBar-root는 이 헤더 말고도 채팅 드로어 내부 헤더(positionSticky)와
@@ -45,10 +52,12 @@ body {
 .MuiAppBar-positionFixed:hover {
   background-color: ${t.sidebarBg} !important;
 }
-/* 나머지 AppBar(드로어 헤더, 탭바)는 항상 보이는 패널이라 배경을 고정한다. */
+/* 나머지 AppBar(드로어 헤더, 탭바)는 투명/호버 트릭 대신 다른 패널들과 같은
+   반투명(0.82) 처리를 한다. 지난 수정에서 실수로 완전 불투명하게 줘서
+   채팅창 전체가 반투명한 느낌이 안 났었다. */
 .MuiAppBar-positionSticky,
 .MuiAppBar-positionStatic {
-  background-color: ${t.sidebarBg} !important;
+  background-color: rgba(${ccfoliaHexToRgb(t.sidebarBg)}, 0.82) !important;
 }
 .MuiAppBar-root,
 .MuiAppBar-root .MuiTypography-root {
@@ -67,6 +76,13 @@ body {
 .MuiTooltip-tooltip {
   background-color: rgba(${ccfoliaHexToRgb(t.textPrimary)}, 0.92) !important;
   color: ${t.sidebarBg} !important;
+}
+
+/* ---- 알림창(Snackbar, "Monitoring mode is enabled..." 같은 하단 토스트) ---- */
+.MuiSnackbarContent-root {
+  background-color: rgba(${ccfoliaHexToRgb(t.sidebarBg)}, 0.92) !important;
+  color: ${t.textPrimary} !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18) !important;
 }
 
 /* ---- 폼 라벨: 포커스 중일 땐 원래 강조색(파란색) 유지 ---- */
@@ -136,13 +152,12 @@ body {
 
 /* ---- 채팅 멀티라인 입력창 ----
    MuiInputBase-root 전체에 걸면 밑줄 스타일 필드까지 박스로 바뀌므로
-   MuiInputBase-multiline으로 스코프를 좁힌다. 배경은 sidebarBg를 써서 위쪽
-   캐릭터 이름 입력칸(패널 배경 그대로)과 같은 색으로 통일하고, 테두리만으로
-   입력창임을 구분한다. */
+   MuiInputBase-multiline으로 스코프를 좁힌다. 배경을 따로 칠하지 않고
+   투명하게 둬서 뒤쪽 반투명 패널(MuiPaper-elevation6)과 자연스럽게
+   하나로 이어지게 한다. 예전엔 여기에만 별도 배경색 + 테두리를 줘서
+   패널 위에 불투명한 박스가 붕 뜬 것처럼 보였다. */
 .MuiInputBase-multiline {
-  background-color: ${t.sidebarBg} !important;
-  border: 1px solid rgba(${ccfoliaHexToRgb(t.textSecondary)}, 0.3) !important;
-  border-radius: 4px !important;
+  background-color: transparent !important;
 }
 /* 입력창 안에 실제로 타이핑되는 글자색. 기존엔 래퍼(MuiInputBase-multiline)만
    손대고 정작 안쪽 <textarea class="MuiInputBase-input">는 그대로 둬서
