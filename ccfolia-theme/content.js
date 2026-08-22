@@ -107,12 +107,14 @@ body {
    그림자 효과가 생겨 완전히 뺐었다. 근데 그러면 HP 게이지처럼 텍스트
    바로 밑 배경이 계속 바뀌는 곳에서 글자색과 배경색이 우연히 비슷해지면
    (예: 다크 프리셋의 밝은 글자가 HP 게이지의 밝은 부분과 겹칠 때) 글자가
-   그대로 안 보인다. 다시 넣되, 예전보다 훨씬 얇고(0.6px) 옅은
-   -webkit-text-stroke로 바꾼다 — 흐릿하게 번지는 shadow와 달리 딱 붙는
-   얇은 선이라 다른 일반 텍스트에 걸려도 티가 잘 안 난다. 테두리 색은
-   textPrimary의 명도를 보고 자동으로 반대쪽(밝으면 어둡게, 어두우면
-   밝게)을 골라서, 프리셋이 뭐든 항상 배경과 대비가 생기게 한다.
-   paint-order로 테두리를 글자 채우기보다 먼저 그려서 안쪽을 안 먹는다.
+   그대로 안 보인다. 다시 넣되, 흐릿하게 번지는 shadow 대신 딱 붙는
+   -webkit-text-stroke로 바꿔서 다른 일반 텍스트에 걸려도 티가 덜 나게
+   한다. 테두리 색은 textPrimary의 명도를 보고 자동으로 반대쪽(밝으면
+   어둡게, 어두우면 밝게)을 골라서, 프리셋이 뭐든 항상 배경과 대비가
+   생기게 한다. paint-order: stroke fill이라 테두리 중 안쪽 절반은 글자
+   채우기에 덮여 실제로는 stroke-width의 절반만 밖으로 보인다 — 처음엔
+   0.6px를 썼는데 그럼 보이는 두께가 0.3px라 예전 halo(약 1px)보다 훨씬
+   얇았다. 1.6px로 키워서 보이는 두께를 halo와 비슷하게 맞췄다.
    HP/MP 라벨과 수치(예: .cyGeBV 같은 해시 클래스)는 ccfolia 자체가 이미
    흰색 text-shadow halo를 하드코딩해뒀다 — text-shadow와
    -webkit-text-stroke는 서로 다른 속성이라 우리가 stroke만 줘서는 저
@@ -123,7 +125,7 @@ body {
 .MuiTypography-body1 {
   color: ${t.textPrimary} !important;
   text-shadow: none !important;
-  -webkit-text-stroke: 0.6px ${ccfoliaAutoOutlineColor(t.textPrimary)} !important;
+  -webkit-text-stroke: 1.6px ${ccfoliaAutoOutlineColor(t.textPrimary)} !important;
   paint-order: stroke fill !important;
 }
 

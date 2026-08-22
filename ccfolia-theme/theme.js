@@ -138,7 +138,7 @@ function ccfoliaRelativeLuminance(hex) {
 }
 
 function ccfoliaAutoOutlineColor(textHex) {
-  return ccfoliaRelativeLuminance(textHex) > 0.5 ? "rgba(0, 0, 0, 0.6)" : "rgba(255, 255, 255, 0.75)";
+  return ccfoliaRelativeLuminance(textHex) > 0.5 ? "rgba(0, 0, 0, 0.85)" : "rgba(255, 255, 255, 0.9)";
 }
 
 function ccfoliaHexToRgb(hex) {
