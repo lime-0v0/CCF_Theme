@@ -30,7 +30,9 @@ function renderPresets() {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.textContent = preset.label;
-    if (presetMatches(preset)) btn.classList.add("active");
+    const active = presetMatches(preset);
+    if (active) btn.classList.add("active");
+    btn.setAttribute("aria-pressed", active ? "true" : "false");
     btn.addEventListener("click", () => {
       currentTheme = Object.assign({}, CCFOLIA_DEFAULT_THEME, preset.theme);
       renderPresets();
