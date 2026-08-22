@@ -28,9 +28,15 @@ h1 {
   margin-bottom: 16px;
 }
 
+/* 세로 길이를 고정값으로 못박는다 -- 안 그러면 이름이 길어서 줄바꿈 없이
+   혼자 다음 줄로 넘어가는 칩(내용 기준 높이만 적용됨)이 같은 줄에 있는
+   칩들과 다른 높이로 보일 수 있다. box-sizing: border-box라 padding/border
+   를 포함해서 정확히 32px가 된다. */
 .presets button {
   flex: 1;
-  padding: 8px 4px;
+  box-sizing: border-box;
+  height: 32px;
+  padding: 0 4px;
   font-size: 12px;
   border-radius: 4px;
   border: 1px solid #7c7593;
