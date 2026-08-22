@@ -140,17 +140,19 @@ body {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18) !important;
 }
 
-/* ---- 입력 필드(캐릭터 이름 칸 + 메시지 입력창) ----
-   패널보다 살짝 어둡게 처리했었는데, 패널 반투명도를 올린 뒤로 그 차이가
-   더 도드라져서 입력창만 유독 어두워 보였다. 그냥 투명하게 둬서 패널과
-   완전히 하나로 이어지게 한다.
+/* ---- 입력 필드(캐릭터 이름 칸 + 메시지 입력창): 패널보다 살짝 어둡게 ----
+   원본 다크 테마도 탭바/패널은 한 톤이고, 캐릭터 이름 칸과 메시지 입력창만
+   그보다 살짝 진한("들어간") 톤을 쓴다. 검정 반투명 오버레이를 얹으면
+   sidebarBg로 어떤 색을 고르든 항상 패널보다 살짝 어둡게 유지된다.
+   (한 번 투명하게 뺐었는데, 어둡던 진짜 원인은 이게 아니라 주변 테두리
+   쪽이었다고 해서 다시 되돌림.)
    MuiInputBase-root 전체에 걸면 밑줄 스타일 필드까지 박스로 바뀌므로
    MuiInputBase-multiline으로 스코프를 좁힌다.
    .sc-hfVCuV(캐릭터 이름 칸)는 안정적인 Mui 클래스가 없어 해시 클래스를
    쓴다 — ccfolia 버전업 시 깨질 수 있음. */
 .MuiInputBase-multiline,
 .sc-hfVCuV {
-  background-color: transparent !important;
+  background-color: rgba(0, 0, 0, 0.05) !important;
 }
 /* 입력창 안에 실제로 타이핑되는 글자색. 기존엔 래퍼(MuiInputBase-multiline)만
    손대고 정작 안쪽 <textarea class="MuiInputBase-input">는 그대로 둬서
@@ -197,10 +199,12 @@ body {
   color: ${t.textPrimary} !important;
 }
 
-/* ---- 구분선 ---- */
+/* ---- 구분선 ----
+   메시지 입력창 바로 위 구분선 등, 패널이 더 밝아지고 나니(0.9) 상대적으로
+   너무 진하게 도드라져서 옅게 낮췄다. */
 .MuiDivider-root {
-  border-color: rgba(${ccfoliaHexToRgb(t.textSecondary)}, 0.3) !important;
-  background-color: rgba(${ccfoliaHexToRgb(t.textSecondary)}, 0.3) !important;
+  border-color: rgba(${ccfoliaHexToRgb(t.textSecondary)}, 0.15) !important;
+  background-color: rgba(${ccfoliaHexToRgb(t.textSecondary)}, 0.15) !important;
 }
 
 /* ---- 홈 화면 방 목록 카드 ----
