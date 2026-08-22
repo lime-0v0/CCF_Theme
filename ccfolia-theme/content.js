@@ -23,14 +23,23 @@ body {
   background-color: ${t.sidebarBg} !important;
 }
 
+/* ---- 룸 전체 배경 이미지 레이어(.sc-jCPQUC > .sc-bKoKAZ) ----
+   방 표지 이미지를 화면 전체에 깔아주는 장식용 배경 레이어인데, ccfolia
+   자체 CSS가 여길 반투명(opacity)하게 처리해서 뒤에 비치는 body 색과
+   섞여 보인다. body를 밝게 바꾸다 보니 이 이미지가 원래보다 뿌옇게
+   washed-out 되어 보였던 게 진짜 원인이었다(처음엔 .sc-eVedOh를 의심했는데
+   아니었음). 이 레이어의 부모(.sc-jCPQUC)만 boardBg로 어둡게 채워서, body를
+   무슨 색으로 하든 이 배경 이미지 톤은 원래대로 유지되게 한다. */
+.sc-jCPQUC {
+  background-color: ${t.boardBg} !important;
+}
+
 /* ---- 룸(보드) 배경 (해시 클래스, ccfolia 1.36.3 기준 — 버전업 시 깨질 수 있음) ----
    헤더/패널과는 분리된 별도 색(boardBg). 씬이 없을 때 보이는 격자는 반투명
    흰 선(rgba(255,255,255,0.1))만 inline style로 그려져 있고 그 자체는 배경이
-   투명이라 부모 배경을 그대로 물려받는다.
-   예전엔 이 배경색을 씬 이미지를 직접 감싸는 .sc-eVedOh에 줬는데, 씬에
-   이미지가 있을 때도 이미지가 살짝 어둡게 뜨는 현상이 있었다(이미지가 이
-   배경을 완전히 덮지 못하는 경우가 있는 듯). 그래서 .sc-eVedOh는 건드리지
-   않고, 훨씬 바깥의 뷰포트 컨테이너(.sc-jcsPWJ)만 채운다 — 씬 이미지/토큰과
+   투명이라 부모 배경을 그대로 물려받는다. 씬 이미지를 직접 감싸는
+   .sc-eVedOh는 건드리지 않고(이미지가 살짝 어둡게 뜨는 현상이 있었음),
+   훨씬 바깥의 뷰포트 컨테이너(.sc-jcsPWJ)만 채운다 — 씬 이미지/토큰과
    실제로 겹치지 않는 여백 부분에만 영향을 준다. */
 .sc-jcsPWJ {
   background-color: ${t.boardBg} !important;
