@@ -46,16 +46,12 @@ body {
 .MuiAppBar-positionFixed:hover {
   background-color: ${t.sidebarBg} !important;
 }
-/* 나머지 AppBar(드로어 헤더, 탭바)는 자체 반투명 레이어를 씌우지 않고
-   완전히 투명하게 둔다. 이 둘은 항상 이미 반투명한 부모 패널(드로어 전체,
-   컴포즈 패널) 안에 얹혀 있어서, 여기에 또 같은 반투명색을 씌우면 반투명
-   레이어가 두 겹으로 겹쳐 미묘하게 더 연하고 깨끗한 톤이 된다 — 그래서
-   주사위 아이콘 줄처럼 부모 위에 바로 얹힌(한 겹만 거친) 다른 영역들과
-   색이 달라 보였다. 부모가 이미 알아서 반투명하게 처리해주므로 여기선
-   손대지 않는다. */
+/* 나머지 AppBar(드로어 헤더, 탭바)는 반투명이 아니라 완전 불투명한
+   sidebarBg로 채운다. 반투명(rgba)으로 두면 뒤에 비치는 보드 배경 때문에
+   흰색이 아니라 회색으로 보인다. */
 .MuiAppBar-positionSticky,
 .MuiAppBar-positionStatic {
-  background-color: transparent !important;
+  background-color: ${t.sidebarBg} !important;
 }
 .MuiAppBar-root,
 .MuiAppBar-root .MuiTypography-root {
@@ -150,6 +146,17 @@ body {
    반투명을 끄고 완전 불투명하게 한다. (다른 떠있는 패널들은 위 규칙대로
    계속 반투명 유지.) */
 .sc-bA-DSAS {
+  background-color: ${t.sidebarBg} !important;
+}
+/* 위 규칙이 부모(.sc-bA-DSAS)를 채워도 자식들이 자기만의 배경을 따로 갖고
+   있으면(ccfolia 자체 CSS) 그게 그대로 이긴다. 실제로 어둡게 남아있던
+   자식 요소 두 곳을 직접 지정한다: 주사위 아이콘 줄(.drwLOi)과
+   "Dicebot engine :" 표기 박스(.MuiBox-root, 컴포즈 폼 .sc-jYKCcT 안으로
+   스코프를 좁혀서 사이트 전체의 다른 MuiBox-root까지 건드리지 않는다). */
+.sc-clGGjC.drwLOi {
+  background-color: ${t.sidebarBg} !important;
+}
+.sc-jYKCcT .MuiBox-root {
   background-color: ${t.sidebarBg} !important;
 }
 
