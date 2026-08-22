@@ -12,6 +12,9 @@ const CCFOLIA_STYLE_TAG_ID = "ccfolia-theme";
 function ccfoliaBuildCSS(theme) {
   const t = Object.assign({}, CCFOLIA_DEFAULT_THEME, theme);
 
+  // "기본" 프리셋: ccfolia 원본 다크 테마를 그대로 두고 아무 CSS도 주입하지 않는다.
+  if (t.enabled === false) return "";
+
   return `
 /* ---- 페이지 기본 배경 (룸 목록 화면, 룸 화면에서 보드 UI 바깥의 빈 공간) ----
    헤더/입력창/사이드바/패널과 같은 색(sidebarBg)을 쓴다. MUI CssBaseline이

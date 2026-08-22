@@ -9,7 +9,10 @@ const CCFOLIA_STORAGE_KEY = "ccfoliaTheme";
 // 곧 sidebarBg라 자연히 헤더/패널과 같은 색이 된다.
 // 룸(보드) 배경은 일부러 색을 안 준다 — 룸에는 항상 방 표지 사진을 블러
 // 처리한 배경 레이어가 깔려 있어서, 우리가 단색을 덮으면 그 사진을 가려버린다.
+// enabled: false면 content.js가 CSS를 아예 주입하지 않는다("기본" 프리셋 =
+// ccfolia 원본 다크 테마 그대로, 확장을 끈 것과 동일한 효과).
 const CCFOLIA_DEFAULT_THEME = {
+  enabled: true,
   sidebarBg: "#FDFCFF",
   textPrimary: "#2B2B33",
   textSecondary: "#6B6875",
@@ -22,6 +25,43 @@ const CCFOLIA_THEME_FIELDS = [
   { key: "textPrimary", label: "기본 텍스트" },
   { key: "textSecondary", label: "보조 텍스트" },
   { key: "tabActive", label: "활성 탭 / 강조색 (전송 버튼도 이 색을 씀)" },
+];
+
+// 팝업 상단의 프리셋 버튼 3개.
+//  - off: ccfolia 원본 다크 테마 그대로 (CSS 주입 안 함)
+//  - white: 지금까지 만든 밝은 톤 (기본값과 동일)
+//  - solarized: Solarized Light 기반 — Ethan Schoonover가 눈의 피로도와
+//    명도 대비를 정밀하게 계산해서 만든, 코드 에디터/터미널 등에서 가독성
+//    때문에 널리 쓰이는 검증된 배색. 크림색 배경 + 채도를 낮춘 슬레이트
+//    톤 텍스트로 순백/순검정보다 대비가 부드럽다.
+const CCFOLIA_PRESETS = [
+  {
+    id: "off",
+    label: "기본",
+    theme: { enabled: false },
+  },
+  {
+    id: "white",
+    label: "화이트",
+    theme: {
+      enabled: true,
+      sidebarBg: "#FDFCFF",
+      textPrimary: "#2B2B33",
+      textSecondary: "#6B6875",
+      tabActive: "#8E4EC6",
+    },
+  },
+  {
+    id: "solarized",
+    label: "세피아",
+    theme: {
+      enabled: true,
+      sidebarBg: "#FDF6E3",
+      textPrimary: "#586E75",
+      textSecondary: "#93A1A1",
+      tabActive: "#268BD2",
+    },
+  },
 ];
 
 function ccfoliaHexToRgb(hex) {

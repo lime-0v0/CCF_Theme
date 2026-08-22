@@ -1,14 +1,38 @@
 "use strict";
 
+const presetsEl = document.getElementById("presets");
+const fieldsWrapEl = document.getElementById("fieldsWrap");
 const fieldsEl = document.getElementById("fields");
 const statusEl = document.getElementById("status");
 const saveBtn = document.getElementById("save");
-const resetBtn = document.getElementById("reset");
 
 let currentTheme = Object.assign({}, CCFOLIA_DEFAULT_THEME);
 let saveTimer = null;
 
-function renderFields(theme) {
+function presetMatches(preset) {
+  const merged = Object.assign({}, CCFOLIA_DEFAULT_THEME, preset.theme);
+  return Object.keys(merged).every((key) => merged[key] === currentTheme[key]);
+}
+
+function renderPresets() {
+  presetsEl.innerHTML = "";
+  for (const preset of CCFOLIA_PRESETS) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = preset.label;
+    if (presetMatches(preset)) btn.classList.add("active");
+    btn.addEventListener("click", () => {
+      currentTheme = Object.assign({}, CCFOLIA_DEFAULT_THEME, preset.theme);
+      renderPresets();
+      renderFields();
+      saveTheme(true);
+    });
+    presetsEl.appendChild(btn);
+  }
+}
+
+function renderFields() {
+  fieldsWrapEl.style.display = currentTheme.enabled === false ? "none" : "";
   fieldsEl.innerHTML = "";
   for (const { key, label } of CCFOLIA_THEME_FIELDS) {
     const row = document.createElement("div");
@@ -21,9 +45,11 @@ function renderFields(theme) {
     const input = document.createElement("input");
     input.type = "color";
     input.id = `color-${key}`;
-    input.value = theme[key];
+    input.value = currentTheme[key];
     input.addEventListener("input", () => {
       currentTheme[key] = input.value;
+      currentTheme.enabled = true;
+      renderPresets();
       scheduleAutoSave();
     });
 
@@ -50,16 +76,11 @@ function saveTheme(showStatus) {
 function loadTheme() {
   chrome.storage.local.get(CCFOLIA_STORAGE_KEY, (result) => {
     currentTheme = Object.assign({}, CCFOLIA_DEFAULT_THEME, result[CCFOLIA_STORAGE_KEY]);
-    renderFields(currentTheme);
+    renderPresets();
+    renderFields();
   });
 }
 
 saveBtn.addEventListener("click", () => saveTheme(true));
-
-resetBtn.addEventListener("click", () => {
-  currentTheme = Object.assign({}, CCFOLIA_DEFAULT_THEME);
-  renderFields(currentTheme);
-  saveTheme(true);
-});
 
 loadTheme();

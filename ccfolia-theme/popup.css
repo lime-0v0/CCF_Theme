@@ -18,6 +18,33 @@ h1 {
   margin: 0 0 14px;
 }
 
+.presets {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.presets button {
+  flex: 1;
+  padding: 8px 4px;
+  font-size: 12px;
+  border-radius: 4px;
+  border: 1px solid #d8d5e0;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.presets button.active {
+  border-color: #8e4ec6;
+  box-shadow: 0 0 0 1px #8e4ec6 inset;
+  font-weight: 600;
+}
+
+#fieldsWrap {
+  border-top: 1px solid #eee6f2;
+  padding-top: 10px;
+}
+
 .field {
   display: flex;
   align-items: center;
