@@ -107,20 +107,23 @@ body {
   color: ${t.textPrimary} !important;
 }
 
-/* ---- 채팅 메시지 발신자명 (캐릭터별 동적 색상) ----
-   MuiListItemText-primary에 캐릭터마다 다른 색이 inline style로 들어가는데,
-   원래 어두운 배경 기준으로 고른 밝은/파스텔 톤(연회색, 연두색 등)이라
-   우리 밝은 배경에서는 대비가 너무 낮다. 색상 자체(캐릭터 구분)는 그대로
-   두고 밝기만 균일하게 낮춰서 어디서든 읽히게 한다. */
-.MuiListItemText-primary {
-  filter: brightness(0.65);
-}
-
-/* ---- 주사위 판정 결과 색상 코딩(BCDice) ----
-   !important 없이, 단일 클래스 수준으로 우선순위를 낮춰서
-   기본값만 채우고 BCDice가 지정한 크리티컬/펌블 색은 자연스럽게 이기도록 한다. */
-.MuiTypography-body2 {
-  color: ${t.textPrimary};
+/* ---- 채팅 메시지 발신자명, 주사위 판정 결과 색상(BCDice) — 손대지 않음 ----
+   여러 명이 같은 화면을 보는 사이트라, 이 확장을 켠 사람에게만 색이 달리
+   보이면 안 된다("빨간 캐릭터"라고 말했는데 나한테만 다르게 보이는 식의
+   혼란). 캐릭터별 발신자명 색(MuiListItemText-primary)과 주사위 성공/실패
+   색(BCDice가 지정) 둘 다 ccfolia가 주는 색을 그대로 쓰게 둔다.
+   예전엔 .MuiTypography-body2에 색을 깔아서 "기본값만 채우고 BCDice가
+   이기게" 하려 했는데, BCDice의 색도 클래스 선택자 하나짜리라 우선순위가
+   같았다 — 이러면 나중에 삽입된 우리 스타일이 로드 순서상 이겨버려서
+   실제로는 BCDice 색을 덮고 있었다. */
+/* 채팅 메시지 본문 자체(주사위 식+결과를 감싸는 바깥 <p>)는 여전히 어둡게
+   채워야 한다 — 안 그러면 원래 다크 테마 색 그대로 남아 밝은 배경에서
+   안 보인다. 다행히 성공/실패 색은 그 안의 별도 <span>에 따로 붙어서
+   MuiListItemText-secondary 클래스가 없다. 그래서 이 클래스만 잡으면
+   바깥 텍스트는 채워지고, 안쪽 BCDice 색상 span은 자기 색이 있으니
+   상속보다 우선해서 자연스럽게 이긴다(안전하게 !important 사용 가능). */
+.MuiListItemText-secondary {
+  color: ${t.textPrimary} !important;
 }
 
 /* ---- 아이콘 전역 처리 ----
