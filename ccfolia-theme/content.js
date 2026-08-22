@@ -47,11 +47,11 @@ body {
   background-color: ${t.sidebarBg} !important;
 }
 /* 나머지 AppBar(드로어 헤더, 탭바)는 투명/호버 트릭 대신 다른 패널들과 같은
-   반투명(0.82) 처리를 한다. 지난 수정에서 실수로 완전 불투명하게 줘서
+   반투명(0.9) 처리를 한다. 지난 수정에서 실수로 완전 불투명하게 줘서
    채팅창 전체가 반투명한 느낌이 안 났었다. */
 .MuiAppBar-positionSticky,
 .MuiAppBar-positionStatic {
-  background-color: rgba(${ccfoliaHexToRgb(t.sidebarBg)}, 0.82) !important;
+  background-color: rgba(${ccfoliaHexToRgb(t.sidebarBg)}, 0.9) !important;
 }
 .MuiAppBar-root,
 .MuiAppBar-root .MuiTypography-root {
@@ -63,7 +63,7 @@ body {
 .MuiDialog-paper,
 .MuiPopover-paper:not(.MuiCard-root),
 .MuiMenu-paper:not(.MuiCard-root) {
-  background-color: rgba(${ccfoliaHexToRgb(t.sidebarBg)}, 0.82) !important;
+  background-color: rgba(${ccfoliaHexToRgb(t.sidebarBg)}, 0.9) !important;
   color: ${t.textPrimary} !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18) !important;
 }
@@ -140,7 +140,7 @@ body {
    (예전엔 완전 불투명 sidebarBg를 줘서, 원래 반투명했던 캐릭터 편집창 같은
    다른 떠 있는 창들과 톤이 어긋났다.) */
 .MuiPaper-elevation6:not(.MuiCard-root) {
-  background-color: rgba(${ccfoliaHexToRgb(t.sidebarBg)}, 0.82) !important;
+  background-color: rgba(${ccfoliaHexToRgb(t.sidebarBg)}, 0.9) !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18) !important;
 }
 
@@ -222,9 +222,9 @@ body {
 /* ---- 채팅 드로어(사이드바) ----
    원본 다크 테마도 완전 불투명이 아니라 뒤쪽 보드가 살짝 비치는 반투명이었다.
    완전 불투명 sidebarBg를 줘서 밋밋하게 막혀 보였던 걸 다른 패널들과 같은
-   반투명(0.82)으로 맞춘다. */
+   반투명(0.9)으로 맞춘다. */
 .MuiDrawer-paper {
-  background-color: rgba(${ccfoliaHexToRgb(t.sidebarBg)}, 0.82) !important;
+  background-color: rgba(${ccfoliaHexToRgb(t.sidebarBg)}, 0.9) !important;
   color: ${t.textPrimary} !important;
 }
 
@@ -242,14 +242,12 @@ body {
   color: ${t.tabActive} !important;
   font-weight: 700 !important;
 }
-
-/* ---- 보드 위 캐릭터 토큰 호버 그림자 (해시 클래스, ccfolia 1.36.3 기준 — 버전업 시 깨질 수 있음) ----
-   토큰 이미지에 안정적인 Mui 클래스가 없어 HP 게이지 바와 같은 예외로 처리한다. */
-.sc-eKaOtw {
-  transition: filter 0.15s ease !important;
-}
-.sc-eKaOtw:hover {
-  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.45)) !important;
+/* ---- 테두리 버튼의 흰 글자 변형(.MuiButton-outlinedWhite) ----
+   업로드 다이얼로그의 ROOM/ALL/Unsplash 같은 outlined 버튼도 글자색이
+   흰색으로 고정되어 있었다. 위 textWhite와 같은 패턴이라 함께 처리한다. */
+.MuiButton-outlinedWhite {
+  color: ${t.textPrimary} !important;
+  border-color: rgba(${ccfoliaHexToRgb(t.textSecondary)}, 0.5) !important;
 }
 
 /* ---- HP 게이지 바 (해시 클래스, ccfolia 1.36.3 기준 — 버전업 시 깨질 수 있음) ---- */
