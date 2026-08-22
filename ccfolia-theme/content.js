@@ -13,6 +13,15 @@ function ccfoliaBuildCSS(theme) {
   const t = Object.assign({}, CCFOLIA_DEFAULT_THEME, theme);
 
   return `
+/* ---- 페이지 기본 배경 (룸 목록 화면, 씬이 없는 보드 뒤편 등) ----
+   MUI CssBaseline이 body에 다크 배경색을 깔아두는데, 그동안 다이얼로그/카드/패널처럼
+   구체적인 컴포넌트만 손보고 이 바탕 자체는 안 건드려서 여전히 어둡게 남아있었다.
+   패널(sidebarBg)/입력창(inputBg)과는 구분되도록 headerBg(연한 오프화이트)를 쓴다. */
+html,
+body {
+  background-color: ${t.headerBg} !important;
+}
+
 /* ---- 헤더 / AppBar: 평소엔 완전히 투명, 호버 시에만 배경이 보임 ---- */
 .MuiAppBar-root {
   background-color: rgba(${ccfoliaHexToRgb(t.headerBg)}, 0) !important;
@@ -94,9 +103,13 @@ function ccfoliaBuildCSS(theme) {
 
 /* ---- 채팅 멀티라인 입력창 ----
    MuiInputBase-root 전체에 걸면 밑줄 스타일 필드까지 박스로 바뀌므로
-   MuiInputBase-multiline으로 스코프를 좁힌다. */
+   MuiInputBase-multiline으로 스코프를 좁힌다.
+   배경은 inputBg(순백)가 아니라 sidebarBg를 쓴다: 원래 다크 테마에서는 위쪽
+   캐릭터 이름 입력칸과 이 메시지 입력창이 같은 배경색을 공유했는데, inputBg를
+   쓰면 캐릭터 이름 칸(패널 배경 그대로, sidebarBg)과 색이 미묘하게 달라져
+   버렸다. 테두리만으로 입력창임을 구분한다. */
 .MuiInputBase-multiline {
-  background-color: ${t.inputBg} !important;
+  background-color: ${t.sidebarBg} !important;
   border: 1px solid rgba(${ccfoliaHexToRgb(t.textSecondary)}, 0.3) !important;
   border-radius: 4px !important;
 }
