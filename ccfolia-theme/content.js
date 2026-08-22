@@ -102,12 +102,22 @@ body {
 }
 
 /* ---- 보드(맵) 위 오버레이 텍스트: 이름표 / HP / 말풍선 ---- */
-/* 흰색 halo(text-shadow)를 줬었는데, 이 셀렉터가 board 위 라벨만이 아니라
-   body1/body2.noWrap을 쓰는 다른 일반 텍스트에도 걸려서 원치 않는 그림자
-   효과가 생겼다. 그림자는 빼고 색만 유지한다. */
+/* 예전엔 흰색 halo(text-shadow)를 줬다가, 이 셀렉터가 board 위 라벨만이
+   아니라 body1/body2.noWrap을 쓰는 다른 일반 텍스트에도 걸려서 원치 않는
+   그림자 효과가 생겨 완전히 뺐었다. 근데 그러면 HP 게이지처럼 텍스트
+   바로 밑 배경이 계속 바뀌는 곳에서 글자색과 배경색이 우연히 비슷해지면
+   (예: 다크 프리셋의 밝은 글자가 HP 게이지의 밝은 부분과 겹칠 때) 글자가
+   그대로 안 보인다. 다시 넣되, 예전보다 훨씬 얇고(0.6px) 옅은
+   -webkit-text-stroke로 바꾼다 — 흐릿하게 번지는 shadow와 달리 딱 붙는
+   얇은 선이라 다른 일반 텍스트에 걸려도 티가 잘 안 난다. 테두리 색은
+   textPrimary의 명도를 보고 자동으로 반대쪽(밝으면 어둡게, 어두우면
+   밝게)을 골라서, 프리셋이 뭐든 항상 배경과 대비가 생기게 한다.
+   paint-order로 테두리를 글자 채우기보다 먼저 그려서 안쪽을 안 먹는다. */
 .MuiTypography-body2.MuiTypography-noWrap,
 .MuiTypography-body1 {
   color: ${t.textPrimary} !important;
+  -webkit-text-stroke: 0.6px ${ccfoliaAutoOutlineColor(t.textPrimary)} !important;
+  paint-order: stroke fill !important;
 }
 
 /* ---- 채팅 메시지 발신자명, 주사위 판정 결과 색상(BCDice) — 손대지 않음 ----

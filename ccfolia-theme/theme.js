@@ -119,6 +119,28 @@ function ccfoliaExportTheme(theme) {
   return JSON.stringify(out);
 }
 
+// 보드 위 텍스트(이름표/HP/말풍선)는 캐릭터 토큰, HP 게이지, 방 표지 사진처럼
+// 배경이 계속 바뀌는 곳 위에 떠 있어서, 글자색 하나만으로는 어떤 배경 위에서든
+// 읽힌다는 보장이 없다 — 예를 들어 밝은 글자색이 HP 게이지의 밝은 부분과
+// 겹치면 그대로 묻혀버린다. textPrimary의 명도를 보고 반대쪽 명도로 얇은
+// 테두리(outline)를 자동으로 골라서, 배경이 뭐든 항상 대비가 생기게 한다.
+function ccfoliaRelativeLuminance(hex) {
+  const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex || "");
+  if (!m) return 0;
+  const toLinear = (channel) => {
+    const s = channel / 255;
+    return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+  };
+  const r = toLinear(parseInt(m[1], 16));
+  const g = toLinear(parseInt(m[2], 16));
+  const b = toLinear(parseInt(m[3], 16));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+function ccfoliaAutoOutlineColor(textHex) {
+  return ccfoliaRelativeLuminance(textHex) > 0.5 ? "rgba(0, 0, 0, 0.6)" : "rgba(255, 255, 255, 0.75)";
+}
+
 function ccfoliaHexToRgb(hex) {
   const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex || "");
   if (!m) return "0, 0, 0";
