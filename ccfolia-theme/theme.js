@@ -2,8 +2,9 @@
 "use strict";
 
 const CCFOLIA_STORAGE_KEY = "ccfoliaTheme";
-// 사용자가 직접 만든 색 조합을 프리셋처럼 저장해두는 별도 슬롯.
-// (없으면 popup에서 "내 테마" 버튼 자체가 안 나온다.)
+// 사용자가 직접 만든 색 조합을 여러 개 저장해두는 목록. [{id, name, theme}, ...] 형태.
+const CCFOLIA_CUSTOM_LIST_STORAGE_KEY = "ccfoliaCustomThemes";
+// 예전 버전(단일 슬롯 하나만 저장하던 시절)의 키. 마이그레이션 때 한 번만 읽는다.
 const CCFOLIA_CUSTOM_STORAGE_KEY = "ccfoliaCustomTheme";
 
 // 전송 버튼은 별도 색을 두지 않고 tabActive(강조색)를 그대로 쓴다.
@@ -30,8 +31,12 @@ const CCFOLIA_THEME_FIELDS = [
   { key: "tabActive", label: "활성 탭 / 강조색 (전송 버튼도 이 색을 씀)" },
 ];
 
-// 팝업 상단의 프리셋 버튼 3개.
+// 팝업 상단의 프리셋 버튼들. 어두운 톤 -> 밝은 톤 순서로 나열한다(기본 ->
+// 다크 -> 화이트 -> 세피아): "기본"이 이미 어두운 테마이니 바로 옆에 그걸
+// 대체할 "다크"를 두고, 그 다음부터 밝아지는 순서로 훑어보게 해서 버튼만
+// 봐도 명도가 점점 밝아지는 흐름이 느껴지게 한다.
 //  - off: ccfolia 원본 다크 테마 그대로 (CSS 주입 안 함)
+//  - dark: 원본 대신 대비를 다시 계산한 다크 팔레트
 //  - white: 지금까지 만든 밝은 톤 (기본값과 동일)
 //  - solarized: Solarized Light 기반 — Ethan Schoonover가 눈의 피로도와
 //    명도 대비를 정밀하게 계산해서 만든, 코드 에디터/터미널 등에서 가독성
@@ -42,6 +47,23 @@ const CCFOLIA_PRESETS = [
     id: "off",
     label: "기본",
     theme: { enabled: false },
+  },
+  {
+    id: "dark",
+    label: "다크",
+    // "기본"(off)은 ccfolia 원본 다크 테마를 손대지 않고 그대로 쓰는 옵션이고,
+    // 이건 그 원본 대신 대비를 다시 계산한 별도의 다크 팔레트다. Material
+    // Design의 다크 테마 가이드라인(표면색을 순검정(#000)이 아닌 #121212
+    // 근처로 둬서 헤일레이션/눈부심을 줄임)을 참고해 살짝 보라 톤을 섞었다.
+    // 배경(#1E1E24) 대비 textPrimary 14:1, textSecondary 6.6:1, tabActive
+    // 6.2:1 — 전부 WCAG AA(4.5:1)를 넉넉히 통과하고 AAA(7:1)에 근접한다.
+    theme: {
+      enabled: true,
+      sidebarBg: "#1E1E24",
+      textPrimary: "#EDEBF2",
+      textSecondary: "#A6A1B3",
+      tabActive: "#B388FF",
+    },
   },
   {
     id: "white",
@@ -68,23 +90,6 @@ const CCFOLIA_PRESETS = [
       // (#657B83, "본문용" 톤)으로 바꿔서 대비를 4.1:1까지 끌어올렸다.
       textSecondary: "#657B83",
       tabActive: "#268BD2",
-    },
-  },
-  {
-    id: "dark",
-    label: "다크",
-    // "기본"(off)은 ccfolia 원본 다크 테마를 손대지 않고 그대로 쓰는 옵션이고,
-    // 이건 그 원본 대신 대비를 다시 계산한 별도의 다크 팔레트다. Material
-    // Design의 다크 테마 가이드라인(표면색을 순검정(#000)이 아닌 #121212
-    // 근처로 둬서 헤일레이션/눈부심을 줄임)을 참고해 살짝 보라 톤을 섞었다.
-    // 배경(#1E1E24) 대비 textPrimary 14:1, textSecondary 6.6:1, tabActive
-    // 6.2:1 — 전부 WCAG AA(4.5:1)를 넉넉히 통과하고 AAA(7:1)에 근접한다.
-    theme: {
-      enabled: true,
-      sidebarBg: "#1E1E24",
-      textPrimary: "#EDEBF2",
-      textSecondary: "#A6A1B3",
-      tabActive: "#B388FF",
     },
   },
 ];

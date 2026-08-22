@@ -1,6 +1,8 @@
 "use strict";
 
 const presetsEl = document.getElementById("presets");
+const presetDividerEl = document.getElementById("presetDivider");
+const customPresetsEl = document.getElementById("customPresets");
 const fieldsWrapEl = document.getElementById("fieldsWrap");
 const fieldsEl = document.getElementById("fields");
 const statusEl = document.getElementById("status");
@@ -13,39 +15,93 @@ const importBtn = document.getElementById("importBtn");
 const shareCloseBtn = document.getElementById("shareClose");
 
 let currentTheme = Object.assign({}, CCFOLIA_DEFAULT_THEME);
-let customTheme = null; // 사용자가 저장한 "내 테마" (없으면 null)
+let customThemes = []; // [{id, name, theme}, ...] 사용자가 저장한 테마 여러 개
 let saveTimer = null;
 
-function allPresets() {
-  const list = CCFOLIA_PRESETS.slice();
-  if (customTheme) {
-    list.push({ id: "custom", label: "내 테마", theme: customTheme });
-  }
-  return list;
+function ccfoliaGenId() {
+  return `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
 }
 
-function presetMatches(preset) {
-  const merged = Object.assign({}, CCFOLIA_DEFAULT_THEME, preset.theme);
+function presetMatches(themePartial) {
+  const merged = Object.assign({}, CCFOLIA_DEFAULT_THEME, themePartial);
   return Object.keys(merged).every((key) => merged[key] === currentTheme[key]);
+}
+
+function applyTheme(themePartial) {
+  currentTheme = Object.assign({}, CCFOLIA_DEFAULT_THEME, themePartial);
+  renderPresets();
+  renderFields();
+  saveTheme();
+}
+
+// 버튼 배경/글자색을 그 프리셋이 실제로 적용할 색으로 미리 보여준다.
+// "기본"(off)은 색이 없는 옵션이라 기본 버튼 스타일 그대로 둔다.
+function applyPresetPreview(btn, themePartial) {
+  if (themePartial.enabled === false) return;
+  const t = Object.assign({}, CCFOLIA_DEFAULT_THEME, themePartial);
+  btn.style.background = t.sidebarBg;
+  btn.style.color = t.textPrimary;
 }
 
 function renderPresets() {
   presetsEl.innerHTML = "";
-  for (const preset of allPresets()) {
+  for (const preset of CCFOLIA_PRESETS) {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.textContent = preset.label;
-    const active = presetMatches(preset);
+    applyPresetPreview(btn, preset.theme);
+    const active = presetMatches(preset.theme);
     if (active) btn.classList.add("active");
     btn.setAttribute("aria-pressed", active ? "true" : "false");
-    btn.addEventListener("click", () => {
-      currentTheme = Object.assign({}, CCFOLIA_DEFAULT_THEME, preset.theme);
-      renderPresets();
-      renderFields();
-      saveTheme();
-    });
+    btn.addEventListener("click", () => applyTheme(preset.theme));
     presetsEl.appendChild(btn);
   }
+
+  customPresetsEl.innerHTML = "";
+  const hasCustom = customThemes.length > 0;
+  presetDividerEl.classList.toggle("hidden", !hasCustom);
+  customPresetsEl.classList.toggle("hidden", !hasCustom);
+  for (const custom of customThemes) {
+    customPresetsEl.appendChild(renderCustomChip(custom));
+  }
+}
+
+function renderCustomChip(custom) {
+  const chip = document.createElement("div");
+  chip.className = "presetChip";
+
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.textContent = custom.name;
+  btn.title = custom.name;
+  applyPresetPreview(btn, custom.theme);
+  const active = presetMatches(custom.theme);
+  if (active) btn.classList.add("active");
+  btn.setAttribute("aria-pressed", active ? "true" : "false");
+  btn.addEventListener("click", () => applyTheme(custom.theme));
+
+  const del = document.createElement("button");
+  del.type = "button";
+  del.className = "chipDelete";
+  del.textContent = "×";
+  del.title = `"${custom.name}" 삭제`;
+  del.setAttribute("aria-label", `${custom.name} 삭제`);
+  del.addEventListener("click", (e) => {
+    e.stopPropagation();
+    deleteCustomTheme(custom.id);
+  });
+
+  chip.appendChild(btn);
+  chip.appendChild(del);
+  return chip;
+}
+
+function deleteCustomTheme(id) {
+  customThemes = customThemes.filter((c) => c.id !== id);
+  chrome.storage.local.set({ [CCFOLIA_CUSTOM_LIST_STORAGE_KEY]: customThemes }, () => {
+    renderPresets();
+    showStatus("삭제되었습니다.");
+  });
 }
 
 function renderFields() {
@@ -133,19 +189,42 @@ function showStatus(text) {
 }
 
 function loadTheme() {
-  chrome.storage.local.get([CCFOLIA_STORAGE_KEY, CCFOLIA_CUSTOM_STORAGE_KEY], (result) => {
-    currentTheme = Object.assign({}, CCFOLIA_DEFAULT_THEME, result[CCFOLIA_STORAGE_KEY]);
-    customTheme = result[CCFOLIA_CUSTOM_STORAGE_KEY] || null;
-    renderPresets();
-    renderFields();
-  });
+  chrome.storage.local.get(
+    [CCFOLIA_STORAGE_KEY, CCFOLIA_CUSTOM_STORAGE_KEY, CCFOLIA_CUSTOM_LIST_STORAGE_KEY],
+    (result) => {
+      currentTheme = Object.assign({}, CCFOLIA_DEFAULT_THEME, result[CCFOLIA_STORAGE_KEY]);
+
+      if (Array.isArray(result[CCFOLIA_CUSTOM_LIST_STORAGE_KEY])) {
+        customThemes = result[CCFOLIA_CUSTOM_LIST_STORAGE_KEY];
+      } else if (result[CCFOLIA_CUSTOM_STORAGE_KEY]) {
+        // 예전(단일 슬롯) 버전에서 저장해둔 테마가 있으면 새 목록 형식으로
+        // 한 번만 옮기고, 옛 키는 지운다.
+        customThemes = [{ id: ccfoliaGenId(), name: "내 테마", theme: result[CCFOLIA_CUSTOM_STORAGE_KEY] }];
+        chrome.storage.local.set({ [CCFOLIA_CUSTOM_LIST_STORAGE_KEY]: customThemes });
+        chrome.storage.local.remove(CCFOLIA_CUSTOM_STORAGE_KEY);
+      } else {
+        customThemes = [];
+      }
+
+      renderPresets();
+      renderFields();
+    }
+  );
 }
 
 saveCustomBtn.addEventListener("click", () => {
-  customTheme = Object.assign({}, currentTheme);
-  chrome.storage.local.set({ [CCFOLIA_CUSTOM_STORAGE_KEY]: customTheme }, () => {
+  const defaultName = `내 테마 ${customThemes.length + 1}`;
+  const name = prompt("테마 이름을 입력하세요.", defaultName);
+  if (name === null) return; // 취소
+  const entry = {
+    id: ccfoliaGenId(),
+    name: name.trim() || defaultName,
+    theme: Object.assign({}, currentTheme),
+  };
+  customThemes.push(entry);
+  chrome.storage.local.set({ [CCFOLIA_CUSTOM_LIST_STORAGE_KEY]: customThemes }, () => {
     renderPresets();
-    showStatus("내 테마로 저장되었습니다.");
+    showStatus("테마로 저장되었습니다.");
   });
 });
 
@@ -199,10 +278,7 @@ shareArea.addEventListener("keydown", (e) => {
     showStatus("형식을 확인해주세요.");
     return;
   }
-  currentTheme = Object.assign({}, CCFOLIA_DEFAULT_THEME, sanitized);
-  renderPresets();
-  renderFields();
-  saveTheme();
+  applyTheme(sanitized);
 });
 
 loadTheme();

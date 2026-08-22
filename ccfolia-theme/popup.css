@@ -47,6 +47,57 @@ h1 {
   font-weight: 600;
 }
 
+/* 프리셋 버튼은 배경/글자색을 그 테마의 실제 색(JS에서 inline style로 설정)
+   으로 미리보기 처리한다. 인라인 style이 :hover의 background보다 우선하므로
+   background가 아니라 filter로 호버 피드백을 줘야 미리보기 색 위에서도
+   먹힌다. */
+.presets button:hover {
+  filter: brightness(0.95);
+}
+
+.presetDivider {
+  border: none;
+  border-top: 1px solid #eee6f2;
+  margin: 0 0 12px;
+}
+
+#customPresets {
+  flex-wrap: wrap;
+}
+
+.presetChip {
+  position: relative;
+  flex: 0 1 auto;
+  min-width: 64px;
+}
+
+.presetChip button {
+  width: 100%;
+}
+
+.presetChip .chipDelete {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 16px;
+  height: 16px;
+  flex: none;
+  padding: 0;
+  line-height: 14px;
+  font-size: 11px;
+  border-radius: 50%;
+  border: 1px solid #7c7593;
+  background: #fdfcff;
+  color: #6b6875;
+}
+
+.presetChip .chipDelete:hover {
+  background: #d64550;
+  border-color: #d64550;
+  color: #ffffff;
+  filter: none;
+}
+
 #fieldsWrap {
   border-top: 1px solid #eee6f2;
   padding-top: 12px;
