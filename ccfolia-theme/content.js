@@ -220,6 +220,14 @@ body {
   background-color: ${t.tabActive} !important;
 }
 
+/* ---- 알림 배지(새 메시지 도트, 캐릭터 HP 비공개 "??" 배지 등) ----
+   MUI 기본 secondary 색(핑크, rgb(220,0,78))이 하드코딩되어 있는데, 이건
+   캐릭터별로 다른 공유 데이터가 아니라 사이트 공통 UI 색이라 강조색으로
+   바꿔도 다른 사람과 혼란이 없다. */
+.MuiBadge-colorSecondary {
+  background-color: ${t.tabActive} !important;
+}
+
 /* ---- Chip(보드 위 소품에 붙는 대각선 "캐릭터" 리본 라벨 등) ----
    MuiChip 라벨 글자색이 흰색으로 하드코딩되어 있다. (BGM01/02는 Chip이 아니라
    버튼이라 이 규칙과 무관함 — 아래 MuiButton-textWhite 참고.) */
