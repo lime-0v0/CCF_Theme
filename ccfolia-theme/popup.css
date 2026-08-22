@@ -75,10 +75,15 @@ h1 {
    min-width만 쓰면(예전 방식) 줄바꿈이 안 되는 긴 글자(예: 숫자 나열)에서
    flex 아이템의 "자동 최소 크기"가 내용 크기를 따라가버려서 팝업 폭을
    뚫고 넘쳐버렸다. width를 고정값으로 못박아야 안쪽 button의
-   text-overflow: ellipsis가 실제로 먹는다. */
+   text-overflow: ellipsis가 실제로 먹는다.
+   61px = 기본 프리셋 4개(기본/다크/화이트/세피아) 버튼 한 개의 실제 너비와
+   똑같은 값이다: (팝업 폭 300 - 좌우 패딩 32 - gap 3*8) / 4개 = 61px.
+   "내 테마" 칩도 같은 종류의 컴포넌트(테마 선택 버튼)이므로 크기가 달라지면
+   안 된다 -- 이 값은 하드코딩이라, 프리셋 개수/팝업 폭/패딩/gap 중 하나라도
+   바뀌면 이 숫자도 같이 recalculate 해야 한다. */
 .presetChip {
   position: relative;
-  width: 88px;
+  width: 61px;
   flex: 0 0 auto;
 }
 
@@ -86,10 +91,12 @@ h1 {
   width: 100%;
 }
 
+/* 칩이 61px로 좁아진 뒤로는 -7px만큼 튀어나오면 8px gap을 거의 다 먹어서
+   옆 칩과 닿을 뻔했다(여유 1px). -4px로 줄여서 4px 여유를 둔다. */
 .presetChip .chipDelete {
   position: absolute;
-  top: -7px;
-  right: -7px;
+  top: -4px;
+  right: -4px;
   width: 18px;
   height: 18px;
   flex: none;
