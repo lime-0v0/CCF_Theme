@@ -72,7 +72,7 @@ h1 {
    text-overflow: ellipsis가 실제로 먹는다. */
 .presetChip {
   position: relative;
-  width: 72px;
+  width: 88px;
   flex: 0 0 auto;
 }
 

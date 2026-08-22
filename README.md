@@ -9,8 +9,9 @@
 ```
 ccfolia-theme/
 ├── manifest.json   ← 확장 프로그램 설정 (MV3)
-├── theme.js        ← 기본 테마 값 / 공용 유틸 (popup.js, content.js 공유)
+├── theme.js        ← 기본 테마 값 / 공용 유틸 (popup.js, content.js, background.js 공유)
 ├── content.js       ← 테마 CSS를 페이지에 주입
+├── background.js   ← 단축키(테마 켜고 끄기) 처리
 ├── popup.html/.css/.js ← 툴바 아이콘 클릭 시 뜨는 색상 선택기 UI
 └── README.md
 ```
@@ -51,6 +52,10 @@ ccfolia-theme/
 막혀 있으면 텍스트가 선택된 채로 나오니 직접 Ctrl+C 하면 됩니다). 이 코드를 다른 사람에게
 공유하면, 그 사람은 "가져오기"를 눌러 붙여넣고 Enter만 누르면 똑같은 조합을 바로 적용할 수
 있습니다. 붙여넣은 값은 알려진 색상 필드 + HEX 형식인지 검증한 뒤에만 반영됩니다.
+
+**단축키**: 기본값은 `Ctrl+Shift+U`로, 누를 때마다 "기본"(원본 다크 테마)과 마지막으로 쓰던
+테마 사이를 토글합니다. 팝업을 열지 않고도 빠르게 껐다 켤 수 있습니다. 다른 확장/브라우저
+단축키와 겹치면 `chrome://extensions/shortcuts`에서 바꿀 수 있습니다.
 
 ## 설치 및 테스트 방법
 
