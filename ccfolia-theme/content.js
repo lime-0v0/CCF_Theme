@@ -13,14 +13,11 @@ function ccfoliaBuildCSS(theme) {
   const t = Object.assign({}, CCFOLIA_DEFAULT_THEME, theme);
 
   return `
-/* ---- 페이지 기본 배경 (룸 목록 화면, 씬이 없는 보드 뒤편 등) ----
-   MUI CssBaseline이 body에 다크 배경색을 깔아두는데, 그동안 다이얼로그/카드/패널처럼
-   구체적인 컴포넌트만 손보고 이 바탕 자체는 안 건드려서 여전히 어둡게 남아있었다.
-   패널(sidebarBg)/입력창(inputBg)과는 구분되도록 headerBg(연한 오프화이트)를 쓴다. */
-html,
-body {
-  background-color: ${t.headerBg} !important;
-}
+/* ---- (되돌림) body/html 배경색 강제 지정 ----
+   보드에 씬이 없을 때 보이는 격자 무늬가 body의 어두운 배경과 겹쳐서 만들어지는
+   효과였는데, body를 밝은 색으로 덮어버리면서 격자가 (거의) 안 보이게 됐고,
+   덩달아 헤더가 평소엔 투명하다가 호버 시 밝아지는 효과도 배경과 색이 비슷해져서
+   티가 안 났다. 원래대로 body는 건드리지 않는다. */
 
 /* ---- 헤더 / AppBar: 평소엔 완전히 투명, 호버 시에만 배경이 보임 ---- */
 .MuiAppBar-root {
@@ -95,10 +92,14 @@ body {
   color: ${t.textPrimary} !important;
 }
 
-/* ---- 채팅 하단 패널(캐릭터 선택줄 + 주사위줄) ----
-   MuiPaper-elevation6는 방 목록 카드(MuiCard-root)도 재사용하므로 제외한다. */
+/* ---- 떠 있는 패널들(채팅 하단 패널, Marker/Screen/Scene/Cut-in/캐릭터 목록 창 등) ----
+   MuiPaper-elevation6는 방 목록 카드(MuiCard-root)도 재사용하므로 제외한다.
+   다이얼로그/팝오버와 마찬가지로 반투명 + 옅은 그림자로 통일한다.
+   (예전엔 완전 불투명 sidebarBg를 줘서, 원래 반투명했던 캐릭터 편집창 같은
+   다른 떠 있는 창들과 톤이 어긋났다.) */
 .MuiPaper-elevation6:not(.MuiCard-root) {
-  background-color: ${t.sidebarBg} !important;
+  background-color: rgba(${ccfoliaHexToRgb(t.sidebarBg)}, 0.82) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18) !important;
 }
 
 /* ---- 채팅 멀티라인 입력창 ----
@@ -148,6 +149,14 @@ body {
 }
 .MuiTabs-indicator {
   background-color: ${t.tabActive} !important;
+}
+
+/* ---- BGM 칩(BGM01 / BGM02 등) ----
+   MuiChip 라벨 글자색이 흰색으로 하드코딩되어 평소엔 안 보이다가, ccfolia
+   자체 호버 스타일이 덮어씌워질 때만(어두운 텍스트) 보였다. */
+.MuiChip-root,
+.MuiChip-label {
+  color: ${t.textPrimary} !important;
 }
 
 /* ---- 구분선 ---- */
