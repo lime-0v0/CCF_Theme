@@ -21,6 +21,7 @@ const nameCancelBtn = document.getElementById("nameCancel");
 let currentTheme = Object.assign({}, CCFOLIA_DEFAULT_THEME);
 let customThemes = []; // [{id, name, theme}, ...] 사용자가 저장한 테마 여러 개
 let saveTimer = null;
+let statusTimer = null;
 
 function ccfoliaGenId() {
   return `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
@@ -100,11 +101,20 @@ function renderCustomChip(custom) {
   return chip;
 }
 
+// 삭제를 확인창 없이 바로 실행하는 대신(가벼운 상호작용 유지), 몇 초간
+// "실행취소"할 수 있게 해서 되돌릴 방법 없이 잃어버리는 일이 없게 한다
+// (Nielsen 휴리스틱 "사용자 통제와 자유" -- 되돌릴 수 없는 동작은 확인을
+// 받거나 취소 수단을 줘야 한다).
 function deleteCustomTheme(id) {
-  customThemes = customThemes.filter((c) => c.id !== id);
+  const index = customThemes.findIndex((c) => c.id === id);
+  if (index === -1) return;
+  const [removed] = customThemes.splice(index, 1);
   chrome.storage.local.set({ [CCFOLIA_CUSTOM_LIST_STORAGE_KEY]: customThemes }, () => {
     renderPresets();
-    showStatus("삭제되었습니다.");
+    showStatus("삭제되었습니다.", () => {
+      customThemes.splice(index, 0, removed);
+      chrome.storage.local.set({ [CCFOLIA_CUSTOM_LIST_STORAGE_KEY]: customThemes }, renderPresets);
+    });
   });
 }
 
@@ -188,9 +198,26 @@ function saveTheme() {
   });
 }
 
-function showStatus(text) {
+// undo가 있으면(예: 삭제) 조금 더 오래 보여줘서 클릭할 시간을 준다.
+// statusTimer를 안 챙기고 매번 새 setTimeout만 걸면, 먼저 걸린 타이머가
+// 나중에 뜬 메시지(그리고 그 실행취소 링크)를 조기에 지워버릴 수 있다.
+function showStatus(text, undo) {
+  if (statusTimer) clearTimeout(statusTimer);
   statusEl.textContent = text;
-  setTimeout(() => (statusEl.textContent = ""), 1200);
+  if (undo) {
+    statusEl.append(" ");
+    const undoLink = document.createElement("a");
+    undoLink.href = "#";
+    undoLink.textContent = "실행취소";
+    undoLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (statusTimer) clearTimeout(statusTimer);
+      statusEl.textContent = "";
+      undo();
+    });
+    statusEl.appendChild(undoLink);
+  }
+  statusTimer = setTimeout(() => (statusEl.textContent = ""), undo ? 4000 : 1200);
 }
 
 function loadTheme() {
