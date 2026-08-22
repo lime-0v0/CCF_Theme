@@ -65,3 +65,17 @@ ccfolia-theme/
 - 설정(⚙️) 다이얼로그 상세 내용
 - 카드 뭉치(deck of cards) UI
 - 컨텍스트 메뉴 반투명 효과가 실제로 잘 보이는지 (색 있는 토큰 이미지 위에서 재확인 필요)
+
+## 라이선스 / 서드파티 고지
+
+이 프로젝트는 [MIT License](LICENSE)로 배포됩니다.
+
+순수 HTML/CSS/JavaScript로만 작성되어 있으며, `package.json`이나 외부 라이브러리·CDN 스크립트를
+전혀 사용하지 않습니다 — 따라서 서드파티 라이선스 고지가 필요한 의존성이 없습니다. "세피아" 프리셋의
+색 구성은 [Solarized](https://ethanschoonover.com/solarized/) (Ethan Schoonover, MIT License)의
+색상값에서 영감을 받았을 뿐, 코드를 가져다 쓰지는 않습니다.
+
+## 개인정보처리방침
+
+[PRIVACY.md](PRIVACY.md) 참고 — 요약하면 네트워크 요청 없음, 수집하는 개인정보 없음,
+`chrome.storage.local`을 통한 로컬 저장만 사용합니다.

@@ -4,7 +4,6 @@ const presetsEl = document.getElementById("presets");
 const fieldsWrapEl = document.getElementById("fieldsWrap");
 const fieldsEl = document.getElementById("fields");
 const statusEl = document.getElementById("status");
-const saveBtn = document.getElementById("save");
 const saveCustomBtn = document.getElementById("saveCustom");
 
 let currentTheme = Object.assign({}, CCFOLIA_DEFAULT_THEME);
@@ -30,12 +29,14 @@ function renderPresets() {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.textContent = preset.label;
-    if (presetMatches(preset)) btn.classList.add("active");
+    const active = presetMatches(preset);
+    if (active) btn.classList.add("active");
+    btn.setAttribute("aria-pressed", active ? "true" : "false");
     btn.addEventListener("click", () => {
       currentTheme = Object.assign({}, CCFOLIA_DEFAULT_THEME, preset.theme);
       renderPresets();
       renderFields();
-      saveTheme(true);
+      saveTheme();
     });
     presetsEl.appendChild(btn);
   }
@@ -71,20 +72,23 @@ function renderFields() {
   }
 }
 
+// 색상 드래그 중 매 이벤트마다 저장/토스트가 뜨지 않도록 묶어서(debounce)
+// 손을 뗀 뒤 한 번만 저장하고 "저장됨"을 보여준다. 별도의 수동 저장 버튼은
+// 두지 않는다 -- 있으면 "자동저장되는 건가, 눌러야 하는 건가" 혼란만 생긴다.
 function scheduleAutoSave() {
   if (saveTimer) clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => saveTheme(false), 150);
+  saveTimer = setTimeout(saveTheme, 200);
 }
 
-function saveTheme(showStatus) {
+function saveTheme() {
   chrome.storage.local.set({ [CCFOLIA_STORAGE_KEY]: currentTheme }, () => {
-    if (showStatus) showStatus("저장되었습니다.");
+    showStatus("저장됨");
   });
 }
 
 function showStatus(text) {
   statusEl.textContent = text;
-  setTimeout(() => (statusEl.textContent = ""), 1500);
+  setTimeout(() => (statusEl.textContent = ""), 1200);
 }
 
 function loadTheme() {
@@ -95,8 +99,6 @@ function loadTheme() {
     renderFields();
   });
 }
-
-saveBtn.addEventListener("click", () => saveTheme(showStatus));
 
 saveCustomBtn.addEventListener("click", () => {
   customTheme = Object.assign({}, currentTheme);

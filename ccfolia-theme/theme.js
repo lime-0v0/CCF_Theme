@@ -61,7 +61,12 @@ const CCFOLIA_PRESETS = [
       enabled: true,
       sidebarBg: "#FDF6E3",
       textPrimary: "#586E75",
-      textSecondary: "#93A1A1",
+      // Solarized 원래 팔레트의 base1(#93A1A1, "주석"용 최저 대비 톤)을
+      // 처음에 썼는데, 배경(#FDF6E3) 위에서 명도 대비가 2.5:1 정도로
+      // WCAG 최소 기준(3:1)에도 못 미쳤다. 폼 라벨/placeholder처럼 실제로
+      // 읽어야 하는 UI 텍스트에 쓰기엔 너무 흐렸음. 같은 팔레트의 base00
+      // (#657B83, "본문용" 톤)으로 바꿔서 대비를 4.1:1까지 끌어올렸다.
+      textSecondary: "#657B83",
       tabActive: "#268BD2",
     },
   },
