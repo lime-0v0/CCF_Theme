@@ -33,12 +33,21 @@ body {
   background-color: ${t.boardBg} !important;
 }
 
-/* ---- 헤더 / AppBar: 평소엔 완전히 투명, 호버 시에만 배경이 보임 ---- */
-.MuiAppBar-root {
+/* ---- 상단 고정 헤더(AppBar, positionFixed): 평소엔 완전히 투명, 호버 시에만 배경 ----
+   .MuiAppBar-root는 이 헤더 말고도 채팅 드로어 내부 헤더(positionSticky)와
+   채팅 하단 패널의 Main/Other/Info 탭바(positionStatic)에도 재사용된다.
+   투명/호버 트릭은 상시 떠 있는 메인 헤더에만 맞는 효과라 positionFixed로
+   스코프를 좁힌다. */
+.MuiAppBar-positionFixed {
   background-color: rgba(${ccfoliaHexToRgb(t.sidebarBg)}, 0) !important;
   transition: background-color 0.2s ease !important;
 }
-.MuiAppBar-root:hover {
+.MuiAppBar-positionFixed:hover {
+  background-color: ${t.sidebarBg} !important;
+}
+/* 나머지 AppBar(드로어 헤더, 탭바)는 항상 보이는 패널이라 배경을 고정한다. */
+.MuiAppBar-positionSticky,
+.MuiAppBar-positionStatic {
   background-color: ${t.sidebarBg} !important;
 }
 .MuiAppBar-root,
@@ -90,6 +99,15 @@ body {
     -1px 1px 0 #fff,
     1px 1px 0 #fff,
     0 0 4px #fff !important;
+}
+
+/* ---- 채팅 메시지 발신자명 (캐릭터별 동적 색상) ----
+   MuiListItemText-primary에 캐릭터마다 다른 색이 inline style로 들어가는데,
+   원래 어두운 배경 기준으로 고른 밝은/파스텔 톤(연회색, 연두색 등)이라
+   우리 밝은 배경에서는 대비가 너무 낮다. 색상 자체(캐릭터 구분)는 그대로
+   두고 밝기만 균일하게 낮춰서 어디서든 읽히게 한다. */
+.MuiListItemText-primary {
+  filter: brightness(0.65);
 }
 
 /* ---- 주사위 판정 결과 색상 코딩(BCDice) ----
@@ -163,9 +181,9 @@ body {
   background-color: ${t.tabActive} !important;
 }
 
-/* ---- BGM 칩(BGM01 / BGM02 등) ----
-   MuiChip 라벨 글자색이 흰색으로 하드코딩되어 평소엔 안 보이다가, ccfolia
-   자체 호버 스타일이 덮어씌워질 때만(어두운 텍스트) 보였다. */
+/* ---- Chip(보드 위 소품에 붙는 대각선 "캐릭터" 리본 라벨 등) ----
+   MuiChip 라벨 글자색이 흰색으로 하드코딩되어 있다. (BGM01/02는 Chip이 아니라
+   버튼이라 이 규칙과 무관함 — 아래 MuiButton-textWhite 참고.) */
 .MuiChip-root,
 .MuiChip-label {
   color: ${t.textPrimary} !important;
@@ -195,17 +213,19 @@ body {
   color: ${t.textPrimary} !important;
 }
 
-/* ---- 전송 버튼 ----
-   전송 버튼은 아이콘이 아니라 "SEND" 텍스트가 있는 contained 버튼이라
-   [data-testid="SendIcon"]는 애초에 매치되지 않았다. 별도 색을 두지 않고
-   강조색(tabActive)을 그대로 쓴다. */
-.MuiButton-containedPrimary {
-  background-color: ${t.tabActive} !important;
-  color: #fff !important;
+/* ---- 흰 글자 강제 버튼(.MuiButton-textWhite) ----
+   ccfolia 자체 테마가 만든 커스텀 색상 변형으로, 룸 제목 버튼/채팅창 여닫기
+   버튼/SEND 버튼/BGM01·BGM02 버튼이 전부 이걸 쓴다. 글자색이 흰색으로
+   고정되어 있어 라이트 배경에서 안 보인다.
+   (예전엔 SEND 버튼을 [data-testid="SendIcon"]나 .MuiButton-containedPrimary로
+   잡으려 했는데 실제 클래스가 달라서 둘 다 매치되지 않았다.) */
+.MuiButton-textWhite {
+  color: ${t.textPrimary} !important;
 }
-.MuiButton-containedPrimary.Mui-disabled {
-  background-color: rgba(${ccfoliaHexToRgb(t.tabActive)}, 0.4) !important;
-  color: rgba(255, 255, 255, 0.7) !important;
+/* SEND 버튼만 강조색(tabActive)으로 구분한다. 이 버튼만 type="submit". */
+.MuiButton-textWhite[type="submit"] {
+  color: ${t.tabActive} !important;
+  font-weight: 700 !important;
 }
 
 /* ---- 보드 위 캐릭터 토큰 호버 그림자 (해시 클래스, ccfolia 1.36.3 기준 — 버전업 시 깨질 수 있음) ----
