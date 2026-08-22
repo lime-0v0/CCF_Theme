@@ -23,7 +23,7 @@
       <button id="saveCustom" type="button">+ 새 테마 저장</button>
     </div>
     <div id="nameBox" class="hidden">
-      <input type="text" id="nameInput" maxlength="24" placeholder="테마 이름" />
+      <input type="text" id="nameInput" maxlength="12" placeholder="테마 이름 (최대 12자)" aria-label="테마 이름" />
       <div class="actions">
         <button id="nameConfirm" type="button" class="primary">저장</button>
         <button id="nameCancel" type="button">취소</button>
@@ -34,7 +34,7 @@
       <button id="importBtn" type="button">가져오기</button>
     </div>
     <div id="shareBox" class="hidden">
-      <textarea id="shareArea" rows="2"></textarea>
+      <textarea id="shareArea" rows="2" aria-label="테마 코드"></textarea>
       <div class="actions">
         <button id="shareClose" type="button">닫기</button>
       </div>

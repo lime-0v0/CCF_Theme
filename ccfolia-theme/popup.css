@@ -65,10 +65,15 @@ h1 {
   flex-wrap: wrap;
 }
 
+/* 이름 길이에 상관없이 항상 같은 너비로 고정한다. flex: 0 1 auto +
+   min-width만 쓰면(예전 방식) 줄바꿈이 안 되는 긴 글자(예: 숫자 나열)에서
+   flex 아이템의 "자동 최소 크기"가 내용 크기를 따라가버려서 팝업 폭을
+   뚫고 넘쳐버렸다. width를 고정값으로 못박아야 안쪽 button의
+   text-overflow: ellipsis가 실제로 먹는다. */
 .presetChip {
   position: relative;
-  flex: 0 1 auto;
-  min-width: 64px;
+  width: 72px;
+  flex: 0 0 auto;
 }
 
 .presetChip button {
@@ -77,14 +82,14 @@ h1 {
 
 .presetChip .chipDelete {
   position: absolute;
-  top: -6px;
-  right: -6px;
-  width: 16px;
-  height: 16px;
+  top: -7px;
+  right: -7px;
+  width: 18px;
+  height: 18px;
   flex: none;
   padding: 0;
-  line-height: 14px;
-  font-size: 11px;
+  line-height: 16px;
+  font-size: 12px;
   border-radius: 50%;
   border: 1px solid #7c7593;
   background: #fdfcff;
