@@ -46,12 +46,16 @@ body {
 .MuiAppBar-positionFixed:hover {
   background-color: ${t.sidebarBg} !important;
 }
-/* 나머지 AppBar(드로어 헤더, 탭바)는 투명/호버 트릭 대신 다른 패널들과 같은
-   반투명(0.9) 처리를 한다. 지난 수정에서 실수로 완전 불투명하게 줘서
-   채팅창 전체가 반투명한 느낌이 안 났었다. */
+/* 나머지 AppBar(드로어 헤더, 탭바)는 자체 반투명 레이어를 씌우지 않고
+   완전히 투명하게 둔다. 이 둘은 항상 이미 반투명한 부모 패널(드로어 전체,
+   컴포즈 패널) 안에 얹혀 있어서, 여기에 또 같은 반투명색을 씌우면 반투명
+   레이어가 두 겹으로 겹쳐 미묘하게 더 연하고 깨끗한 톤이 된다 — 그래서
+   주사위 아이콘 줄처럼 부모 위에 바로 얹힌(한 겹만 거친) 다른 영역들과
+   색이 달라 보였다. 부모가 이미 알아서 반투명하게 처리해주므로 여기선
+   손대지 않는다. */
 .MuiAppBar-positionSticky,
 .MuiAppBar-positionStatic {
-  background-color: rgba(${ccfoliaHexToRgb(t.sidebarBg)}, 0.9) !important;
+  background-color: transparent !important;
 }
 .MuiAppBar-root,
 .MuiAppBar-root .MuiTypography-root {
