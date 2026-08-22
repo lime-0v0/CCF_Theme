@@ -112,10 +112,17 @@ body {
    얇은 선이라 다른 일반 텍스트에 걸려도 티가 잘 안 난다. 테두리 색은
    textPrimary의 명도를 보고 자동으로 반대쪽(밝으면 어둡게, 어두우면
    밝게)을 골라서, 프리셋이 뭐든 항상 배경과 대비가 생기게 한다.
-   paint-order로 테두리를 글자 채우기보다 먼저 그려서 안쪽을 안 먹는다. */
+   paint-order로 테두리를 글자 채우기보다 먼저 그려서 안쪽을 안 먹는다.
+   HP/MP 라벨과 수치(예: .cyGeBV 같은 해시 클래스)는 ccfolia 자체가 이미
+   흰색 text-shadow halo를 하드코딩해뒀다 — text-shadow와
+   -webkit-text-stroke는 서로 다른 속성이라 우리가 stroke만 줘서는 저
+   흰색 halo를 안 지우고 그 위에 겹치기만 한다. 다크 프리셋처럼 우리
+   글자색도 밝은 경우, "흰 글자 + 흰 halo"가 겹쳐 그대로 안 보이는 문제가
+   생겼다. text-shadow를 꺼서 halo를 우리 stroke로 완전히 대체한다. */
 .MuiTypography-body2.MuiTypography-noWrap,
 .MuiTypography-body1 {
   color: ${t.textPrimary} !important;
+  text-shadow: none !important;
   -webkit-text-stroke: 0.6px ${ccfoliaAutoOutlineColor(t.textPrimary)} !important;
   paint-order: stroke fill !important;
 }
