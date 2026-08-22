@@ -24,13 +24,12 @@ body {
 }
 
 /* ---- 룸 전체 배경 이미지 레이어(.sc-jCPQUC > .sc-bKoKAZ) ----
-   방 표지 이미지를 화면 전체에 깔아주는 장식용 배경 레이어인데, ccfolia
-   자체 CSS가 여길 반투명(opacity)하게 처리해서 뒤에 비치는 body 색과
-   섞여 보인다. body를 밝게 바꾸다 보니 이 이미지가 원래보다 뿌옇게
-   washed-out 되어 보였던 게 진짜 원인이었다(처음엔 .sc-eVedOh를 의심했는데
-   아니었음). 이 레이어의 부모(.sc-jCPQUC)만 boardBg로 어둡게 채워서, body를
-   무슨 색으로 하든 이 배경 이미지 톤은 원래대로 유지되게 한다. */
-.sc-jCPQUC {
+   방 표지 이미지를 화면 전체에 깔아주는 장식용 배경 레이어. .sc-jCPQUC에
+   boardBg를 줘도 여전히 뿌옇게 보인다는 리포트가 있어서, 아예 이미지가
+   있을 때는 손대지 않고(.sc-bKoKAZ가 실제 url을 가진 배경 이미지를 그리고
+   있을 때) 이미지가 없을 때만 boardBg를 채우도록 바꾼다. :has()로 자식의
+   인라인 style에 "url("가 있는지로 판단한다(Chrome 105+ 필요). */
+.sc-jCPQUC:not(:has([style*="background-image: url("])) {
   background-color: ${t.boardBg} !important;
 }
 
