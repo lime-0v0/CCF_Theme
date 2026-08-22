@@ -13,32 +13,33 @@ function ccfoliaBuildCSS(theme) {
   const t = Object.assign({}, CCFOLIA_DEFAULT_THEME, theme);
 
   return `
-/* ---- 페이지 기본 배경 (룸 목록 화면, 씬이 없는 보드 뒤편 등) ----
-   MUI CssBaseline이 body에 다크 배경색을 깔아두는데, 이걸 안 바꾸면 다이얼로그/
-   카드/패널처럼 구체적인 컴포넌트 바깥의 빈 공간은 계속 어둡게 남는다. */
+/* ---- 페이지 기본 배경 (룸 목록 화면, 룸 화면에서 보드 UI 바깥의 빈 공간) ----
+   헤더/입력창/사이드바/패널과 같은 색(sidebarBg)을 쓴다. MUI CssBaseline이
+   body에 다크 배경색을 깔아두는데, 이걸 안 바꾸면 다이얼로그/카드/패널처럼
+   구체적인 컴포넌트 바깥의 빈 공간은 계속 어둡게 남는다.
+   ccfolia.com/home처럼 보드가 없는 화면은 이 규칙만으로 전체가 통일된다. */
 html,
 body {
-  background-color: ${t.headerBg} !important;
+  background-color: ${t.sidebarBg} !important;
 }
 
-/* ---- 보드 격자무늬 배경 (해시 클래스, ccfolia 1.36.3 기준 — 버전업 시 깨질 수 있음) ----
-   씬이 없을 때 보이는 격자는 반투명 흰 선(rgba(255,255,255,0.1))만 inline
-   style로 그려져 있고 그 자체는 배경이 투명이라 body 색을 그대로 물려받는다.
-   body를 밝게 바꾸면서 격자(옅은 흰 선)가 거의 안 보이게 됐으므로, 격자 선의
-   부모 컨테이너(.sc-eVedOh — 씬 이미지가 있을 때도 같은 위치를 차지하는
-   컨테이너)만 다시 검게 채운다. 씬에 이미지가 있으면 이미지가 이 배경을
-   완전히 덮으므로 영향 없다. */
+/* ---- 룸(보드) 배경 (해시 클래스, ccfolia 1.36.3 기준 — 버전업 시 깨질 수 있음) ----
+   헤더/패널과는 분리된 별도 색(boardBg). 씬이 없을 때 보이는 격자는 반투명
+   흰 선(rgba(255,255,255,0.1))만 inline style로 그려져 있고 그 자체는 배경이
+   투명이라 부모 배경을 그대로 물려받는다. 그 부모 컨테이너(.sc-eVedOh — 씬
+   이미지가 있을 때도 같은 위치를 차지하는 컨테이너)를 boardBg로 채운다.
+   씬에 이미지가 있으면 이미지가 이 배경을 완전히 덮으므로 영향 없다. */
 .sc-eVedOh {
-  background-color: #111111 !important;
+  background-color: ${t.boardBg} !important;
 }
 
 /* ---- 헤더 / AppBar: 평소엔 완전히 투명, 호버 시에만 배경이 보임 ---- */
 .MuiAppBar-root {
-  background-color: rgba(${ccfoliaHexToRgb(t.headerBg)}, 0) !important;
+  background-color: rgba(${ccfoliaHexToRgb(t.sidebarBg)}, 0) !important;
   transition: background-color 0.2s ease !important;
 }
 .MuiAppBar-root:hover {
-  background-color: ${t.headerBg} !important;
+  background-color: ${t.sidebarBg} !important;
 }
 .MuiAppBar-root,
 .MuiAppBar-root .MuiTypography-root {
@@ -56,7 +57,7 @@ body {
 }
 .MuiTooltip-tooltip {
   background-color: rgba(${ccfoliaHexToRgb(t.textPrimary)}, 0.92) !important;
-  color: ${t.inputBg} !important;
+  color: ${t.sidebarBg} !important;
 }
 
 /* ---- 폼 라벨: 포커스 중일 땐 원래 강조색(파란색) 유지 ---- */
@@ -117,11 +118,9 @@ body {
 
 /* ---- 채팅 멀티라인 입력창 ----
    MuiInputBase-root 전체에 걸면 밑줄 스타일 필드까지 박스로 바뀌므로
-   MuiInputBase-multiline으로 스코프를 좁힌다.
-   배경은 inputBg(순백)가 아니라 sidebarBg를 쓴다: 원래 다크 테마에서는 위쪽
-   캐릭터 이름 입력칸과 이 메시지 입력창이 같은 배경색을 공유했는데, inputBg를
-   쓰면 캐릭터 이름 칸(패널 배경 그대로, sidebarBg)과 색이 미묘하게 달라져
-   버렸다. 테두리만으로 입력창임을 구분한다. */
+   MuiInputBase-multiline으로 스코프를 좁힌다. 배경은 sidebarBg를 써서 위쪽
+   캐릭터 이름 입력칸(패널 배경 그대로)과 같은 색으로 통일하고, 테두리만으로
+   입력창임을 구분한다. */
 .MuiInputBase-multiline {
   background-color: ${t.sidebarBg} !important;
   border: 1px solid rgba(${ccfoliaHexToRgb(t.textSecondary)}, 0.3) !important;
@@ -179,11 +178,12 @@ body {
 }
 
 /* ---- 홈 화면 방 목록 카드 ----
-   카드 배경(원래 어두운색)을 밝게, 방 이름/날짜 텍스트를 어둡게 바꾼다.
-   (예전에는 MuiPaper-elevation6 규칙에서 MuiCard-root를 제외하기만 했지만,
-   텍스트 색까지 같이 바꾸면 대비가 깨지지 않으므로 여기서 함께 처리한다.) */
+   카드 배경(원래 어두운색)을 다른 패널들과 같은 sidebarBg로, 방 이름/날짜
+   텍스트를 어둡게 바꾼다. (예전에는 MuiPaper-elevation6 규칙에서
+   MuiCard-root를 제외하기만 했지만, 텍스트 색까지 같이 바꾸면 대비가 깨지지
+   않으므로 여기서 함께 처리한다.) */
 .MuiCard-root {
-  background-color: ${t.inputBg} !important;
+  background-color: ${t.sidebarBg} !important;
 }
 .MuiCard-root .MuiTypography-root {
   color: ${t.textPrimary} !important;
