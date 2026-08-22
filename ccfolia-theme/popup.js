@@ -4,7 +4,13 @@ const presetsEl = document.getElementById("presets");
 const fieldsWrapEl = document.getElementById("fieldsWrap");
 const fieldsEl = document.getElementById("fields");
 const statusEl = document.getElementById("status");
+const shareWrapEl = document.getElementById("shareWrap");
+const shareBoxEl = document.getElementById("shareBox");
+const shareArea = document.getElementById("shareArea");
 const saveCustomBtn = document.getElementById("saveCustom");
+const exportBtn = document.getElementById("exportBtn");
+const importBtn = document.getElementById("importBtn");
+const shareCloseBtn = document.getElementById("shareClose");
 
 let currentTheme = Object.assign({}, CCFOLIA_DEFAULT_THEME);
 let customTheme = null; // 사용자가 저장한 "내 테마" (없으면 null)
@@ -43,9 +49,11 @@ function renderPresets() {
 }
 
 function renderFields() {
+  shareBoxEl.classList.add("hidden");
+
   const enabled = currentTheme.enabled !== false;
   fieldsWrapEl.style.display = enabled ? "" : "none";
-  saveCustomBtn.parentElement.style.display = enabled ? "" : "none";
+  shareWrapEl.style.display = enabled ? "" : "none";
   fieldsEl.innerHTML = "";
   for (const { key, label } of CCFOLIA_THEME_FIELDS) {
     const row = document.createElement("div");
@@ -53,21 +61,54 @@ function renderFields() {
 
     const labelEl = document.createElement("label");
     labelEl.textContent = label;
+    labelEl.title = label;
     labelEl.htmlFor = `color-${key}`;
+
+    const group = document.createElement("div");
+    group.className = "swatchGroup";
 
     const input = document.createElement("input");
     input.type = "color";
     input.id = `color-${key}`;
     input.value = currentTheme[key];
+
+    // ccfolia 자체 색상 지정 UI도 hex 코드 입력을 지원해서, 스와치 옆에
+    // 직접 hex를 타이핑/붙여넣기할 수 있는 텍스트 필드를 같이 둔다.
+    const hexInput = document.createElement("input");
+    hexInput.type = "text";
+    hexInput.className = "hex";
+    hexInput.maxLength = 7;
+    hexInput.spellcheck = false;
+    hexInput.value = currentTheme[key];
+    hexInput.setAttribute("aria-label", `${label} HEX 코드`);
+
     input.addEventListener("input", () => {
       currentTheme[key] = input.value;
+      hexInput.value = input.value;
       currentTheme.enabled = true;
       renderPresets();
       scheduleAutoSave();
     });
 
+    hexInput.addEventListener("change", () => {
+      const normalized = hexInput.value.trim().replace(/^#?/, "#");
+      if (!CCFOLIA_HEX_RE.test(normalized)) {
+        hexInput.value = currentTheme[key];
+        showStatus("HEX 형식이 올바르지 않습니다. 예: #8E4EC6");
+        return;
+      }
+      currentTheme[key] = normalized;
+      input.value = normalized;
+      hexInput.value = normalized;
+      currentTheme.enabled = true;
+      renderPresets();
+      scheduleAutoSave();
+    });
+
+    group.appendChild(input);
+    group.appendChild(hexInput);
     row.appendChild(labelEl);
-    row.appendChild(input);
+    row.appendChild(group);
     fieldsEl.appendChild(row);
   }
 }
@@ -106,6 +147,62 @@ saveCustomBtn.addEventListener("click", () => {
     renderPresets();
     showStatus("내 테마로 저장되었습니다.");
   });
+});
+
+exportBtn.addEventListener("click", () => {
+  const json = ccfoliaExportTheme(currentTheme);
+  shareBoxEl.classList.remove("hidden");
+  shareArea.readOnly = true;
+  shareArea.value = json;
+  shareArea.focus();
+  shareArea.select();
+  // 클립보드 API가 막혀 있어도(권한/포커스 문제) 텍스트가 선택된 채로 보이니
+  // 사용자가 직접 Ctrl+C로 복사할 수 있다 -- 이게 진짜 폴백이고, 클립보드
+  // 자동 복사는 성공하면 좋은 편의 기능일 뿐이다.
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard
+      .writeText(json)
+      .then(() => showStatus("클립보드에 복사되었습니다."))
+      .catch(() => showStatus("아래 코드를 직접 복사해주세요."));
+  } else {
+    showStatus("아래 코드를 직접 복사해주세요.");
+  }
+});
+
+importBtn.addEventListener("click", () => {
+  shareBoxEl.classList.remove("hidden");
+  shareArea.readOnly = false;
+  shareArea.value = "";
+  shareArea.placeholder = "여기에 테마 코드를 붙여넣고 Enter";
+  shareArea.focus();
+});
+
+shareCloseBtn.addEventListener("click", () => {
+  shareBoxEl.classList.add("hidden");
+});
+
+shareArea.addEventListener("keydown", (e) => {
+  if (shareArea.readOnly) return;
+  if (e.key !== "Enter" || e.shiftKey) return;
+  e.preventDefault();
+
+  let parsed;
+  try {
+    parsed = JSON.parse(shareArea.value);
+  } catch (err) {
+    showStatus("형식을 확인해주세요. (JSON 아님)");
+    return;
+  }
+  // 붙여넣은 값은 신뢰할 수 없으니 알려진 키 + hex 형식만 통과시킨다.
+  const sanitized = ccfoliaSanitizeTheme(parsed);
+  if (!sanitized || Object.keys(sanitized).length === 0) {
+    showStatus("형식을 확인해주세요.");
+    return;
+  }
+  currentTheme = Object.assign({}, CCFOLIA_DEFAULT_THEME, sanitized);
+  renderPresets();
+  renderFields();
+  saveTheme();
 });
 
 loadTheme();

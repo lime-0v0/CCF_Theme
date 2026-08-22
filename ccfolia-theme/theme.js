@@ -70,7 +70,49 @@ const CCFOLIA_PRESETS = [
       tabActive: "#268BD2",
     },
   },
+  {
+    id: "dark",
+    label: "다크",
+    // "기본"(off)은 ccfolia 원본 다크 테마를 손대지 않고 그대로 쓰는 옵션이고,
+    // 이건 그 원본 대신 대비를 다시 계산한 별도의 다크 팔레트다. Material
+    // Design의 다크 테마 가이드라인(표면색을 순검정(#000)이 아닌 #121212
+    // 근처로 둬서 헤일레이션/눈부심을 줄임)을 참고해 살짝 보라 톤을 섞었다.
+    // 배경(#1E1E24) 대비 textPrimary 14:1, textSecondary 6.6:1, tabActive
+    // 6.2:1 — 전부 WCAG AA(4.5:1)를 넉넉히 통과하고 AAA(7:1)에 근접한다.
+    theme: {
+      enabled: true,
+      sidebarBg: "#1E1E24",
+      textPrimary: "#EDEBF2",
+      textSecondary: "#A6A1B3",
+      tabActive: "#B388FF",
+    },
+  },
 ];
+
+// 가져오기(테마 JSON 붙여넣기)로 들어온 값은 신뢰할 수 없다. 이 값들이 그대로
+// content.js에서 <style> textContent로 들어가므로, hex 색상 형식이 아닌 값과
+// 알려지지 않은 키는 전부 버리고 검증된 것만 통과시킨다.
+const CCFOLIA_HEX_RE = /^#[0-9a-f]{6}$/i;
+
+function ccfoliaSanitizeTheme(raw) {
+  if (!raw || typeof raw !== "object") return null;
+  const result = {};
+  if (typeof raw.enabled === "boolean") result.enabled = raw.enabled;
+  for (const { key } of CCFOLIA_THEME_FIELDS) {
+    if (typeof raw[key] === "string" && CCFOLIA_HEX_RE.test(raw[key])) {
+      result[key] = raw[key];
+    }
+  }
+  return result;
+}
+
+// 내보내기: 공유/백업용으로 필요한 필드만 뽑아 한 줄 JSON 문자열로 만든다.
+function ccfoliaExportTheme(theme) {
+  const t = Object.assign({}, CCFOLIA_DEFAULT_THEME, theme);
+  const out = { enabled: t.enabled };
+  for (const { key } of CCFOLIA_THEME_FIELDS) out[key] = t[key];
+  return JSON.stringify(out);
+}
 
 function ccfoliaHexToRgb(hex) {
   const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex || "");
