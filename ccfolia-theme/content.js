@@ -263,9 +263,15 @@ body {
 
 /* ---- 다이얼로그 내부 아이콘 버튼 ----
    button 태그 전체에 걸면 DELETE/DUPLICATION 같은 의미색 텍스트 버튼까지
-   덮어쓰므로 아이콘/아이콘버튼만 타겟한다. */
+   덮어쓰므로 아이콘/아이콘버튼만 타겟한다.
+   .Mui-disabled 제외: 캐릭터 편집창 "Standing Image / Difference" 목록의
+   "선택 중" 체크 버튼이 바로 이 클래스(aria-label="選択中", disabled)다.
+   ccfolia 자체 스타일이 옅은 흰색(rgba(255,255,255,0.3))으로 "이미
+   선택됨 = 흐리게"를 표시하는데, 위 색상 전역 지정 규칙(아이콘 전역 처리
+   섹션)과 별개로 이 다이얼로그 전용 규칙도 !important로 덮어쓰고 있어서
+   두 규칙 다 고쳐야 실제로 옅게 유지됐다. */
 .MuiDialog-paper .MuiSvgIcon-root,
-.MuiDialog-paper .MuiIconButton-root {
+.MuiDialog-paper .MuiIconButton-root:not(.Mui-disabled) {
   color: ${t.textPrimary} !important;
 }
 
