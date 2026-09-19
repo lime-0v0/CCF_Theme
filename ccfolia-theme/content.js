@@ -150,9 +150,40 @@ body {
 
 /* ---- 아이콘 전역 처리 ----
    [data-testid="ColorLensIcon"]: 캐릭터 색상 아이콘은 캐릭터마다 색이 바뀌는
-   동적 인라인 스타일이라 전역 규칙에서 제외한다. */
-.MuiSvgIcon-root:not([data-testid="ColorLensIcon"]) {
+   동적 인라인 스타일이라 전역 규칙에서 제외한다.
+   .MuiSvgIcon-colorPrimary/-colorSecondary/-colorDisabled, .Mui-disabled:
+   캐릭터 편집창의 "Standing Image / Difference" 목록처럼, 아이콘 색으로
+   "지금 선택된 게 이거다"를 구분해서 보여주는 곳들이 있다(선택된 쪽을
+   강조색으로 띄우거나, 반대로 흐리게/disabled 처리해서 "이미 선택됨"을
+   표시하는 등 방식은 다양하다). 전부 textPrimary로 덮어쓰면 그 색 차이가
+   사라져서 뭐가 선택된 상태인지 구분이 안 됐다 — 상태를 나타내는 색상
+   변형/클래스는 그대로 두고, 아무 상태도 없는 기본 회색조 아이콘만
+   덮어쓴다. */
+.MuiSvgIcon-root:not([data-testid="ColorLensIcon"]):not(.MuiSvgIcon-colorPrimary):not(.MuiSvgIcon-colorSecondary):not(.MuiSvgIcon-colorDisabled):not(.Mui-disabled) {
   color: ${t.textPrimary} !important;
+}
+
+/* ---- 마우스 올렸을 때 강조(hover) 통일 ----
+   ccfolia 기본 호버 효과는 원래 다크 테마 기준으로 만들어진 흰색 반투명
+   오버레이(MUI의 action.hover)라서, 우리가 밝게 바꾼 목록/메뉴/아이콘
+   버튼 위에서는 거의 안 보인다. 반면 우리가 이미 배경/글자색을 직접
+   지정해둔 요소(AppBar 호버, 프리셋 버튼 등)는 자체 규칙이 있어 멀쩡해
+   보였던 것 — "어떤 건 강조되고 어떤 건 안 되는" 것처럼 보인 이유다.
+   자주 쓰이는 클릭형 컴포넌트 전반에 우리 테마 색 기반 반투명 호버를
+   깔아서 어디를 올리든 똑같이 강조되게 한다. */
+.MuiListItem-button:hover,
+.MuiMenuItem-root:hover,
+.MuiIconButton-root:hover {
+  background-color: rgba(${ccfoliaHexToRgb(t.textSecondary)}, 0.15) !important;
+}
+
+/* ---- "OO님이 입력 중..." 같은 채팅 타이핑 표시 ----
+   MuiTypography의 옅은 회색/흰색 caption 톤을 그대로 쓰는 것으로 보여서,
+   우리 밝은 배경 위에서 묻힌다. caption 변형 전반에 보조 텍스트 색을
+   입힌다. (이 요소를 직접 못 보고 짐작으로 잡은 셀렉터라 안 잡히면
+   알려달라 — 개발자 도구로 정확한 클래스를 찾아 다시 고치면 된다.) */
+.MuiTypography-caption {
+  color: ${t.textSecondary} !important;
 }
 
 /* ---- 떠 있는 패널들(채팅 하단 패널, Marker/Screen/Scene/Cut-in/캐릭터 목록 창 등) ----
