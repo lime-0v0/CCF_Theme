@@ -151,16 +151,24 @@ body {
 /* ---- 아이콘 전역 처리 ----
    [data-testid="ColorLensIcon"]: 캐릭터 색상 아이콘은 캐릭터마다 색이 바뀌는
    동적 인라인 스타일이라 전역 규칙에서 제외한다.
-   .MuiSvgIcon-colorPrimary/-colorSecondary/-colorDisabled, .Mui-disabled:
-   캐릭터 편집창의 "Standing Image / Difference" 목록처럼, 아이콘 색으로
-   "지금 선택된 게 이거다"를 구분해서 보여주는 곳들이 있다(선택된 쪽을
-   강조색으로 띄우거나, 반대로 흐리게/disabled 처리해서 "이미 선택됨"을
-   표시하는 등 방식은 다양하다). 전부 textPrimary로 덮어쓰면 그 색 차이가
-   사라져서 뭐가 선택된 상태인지 구분이 안 됐다 — 상태를 나타내는 색상
-   변형/클래스는 그대로 두고, 아무 상태도 없는 기본 회색조 아이콘만
-   덮어쓴다. */
-.MuiSvgIcon-root:not([data-testid="ColorLensIcon"]):not(.MuiSvgIcon-colorPrimary):not(.MuiSvgIcon-colorSecondary):not(.MuiSvgIcon-colorDisabled):not(.Mui-disabled) {
+   .Mui-disabled(자기 자신이거나 조상이거나 둘 다): 캐릭터 편집창의
+   "Standing Image / Difference" 목록처럼, "이미 선택됨"을 disabled 처리 +
+   옅은 색으로 표시하는 곳이 있다. 처음엔 그냥 이 상태를 안 건드리기만
+   했는데(exclude), ccfolia가 쓰는 원래 색(rgba(255,255,255,0.3), 30%
+   흰색)은 원본 다크 배경 기준이라 우리가 밝게 바꾼 배경에서는 그 자체가
+   거의 안 보인다. 그래서 여기선 그냥 제외만 하고, 실제 색은 아래 별도
+   규칙에서 우리 테마색의 옅은 버전으로 다시 지정한다. */
+.MuiSvgIcon-root:not([data-testid="ColorLensIcon"]):not(.Mui-disabled):not(.Mui-disabled *) {
   color: ${t.textPrimary} !important;
+}
+/* disabled로 표시되는 "이미 선택됨" 아이콘/아이콘버튼 전용 색.
+   ccfolia 원래 색(옅은 흰색)을 그대로 되살리면 밝은 프리셋에서 안 보이니,
+   우리 텍스트색을 낮은 불투명도로 써서 "다른 것보다 흐리다"는 느낌은
+   유지하면서 배경이 밝든 어둡든 실제로 보이게 한다. */
+.Mui-disabled.MuiSvgIcon-root,
+.Mui-disabled .MuiSvgIcon-root,
+.MuiIconButton-root.Mui-disabled {
+  color: rgba(${ccfoliaHexToRgb(t.textPrimary)}, 0.35) !important;
 }
 
 /* ---- 마우스 올렸을 때 강조(hover) 통일 ----
@@ -263,14 +271,9 @@ body {
 
 /* ---- 다이얼로그 내부 아이콘 버튼 ----
    button 태그 전체에 걸면 DELETE/DUPLICATION 같은 의미색 텍스트 버튼까지
-   덮어쓰므로 아이콘/아이콘버튼만 타겟한다.
-   .Mui-disabled 제외: 캐릭터 편집창 "Standing Image / Difference" 목록의
-   "선택 중" 체크 버튼이 바로 이 클래스(aria-label="選択中", disabled)다.
-   ccfolia 자체 스타일이 옅은 흰색(rgba(255,255,255,0.3))으로 "이미
-   선택됨 = 흐리게"를 표시하는데, 위 색상 전역 지정 규칙(아이콘 전역 처리
-   섹션)과 별개로 이 다이얼로그 전용 규칙도 !important로 덮어쓰고 있어서
-   두 규칙 다 고쳐야 실제로 옅게 유지됐다. */
-.MuiDialog-paper .MuiSvgIcon-root,
+   덮어쓰므로 아이콘/아이콘버튼만 타겟한다. disabled(선택됨 표시 등)는
+   제외 — 실제 색은 위 "아이콘 전역 처리" 섹션의 전용 규칙이 맡는다. */
+.MuiDialog-paper .MuiSvgIcon-root:not(.Mui-disabled):not(.Mui-disabled *),
 .MuiDialog-paper .MuiIconButton-root:not(.Mui-disabled) {
   color: ${t.textPrimary} !important;
 }
