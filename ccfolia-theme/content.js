@@ -24,6 +24,11 @@ function ccfoliaBuildCSS(theme) {
 html,
 body {
   background-color: ${t.sidebarBg} !important;
+  /* --ccfolia-muted-text: ccfoliaFixAchromaticSpans()가 JS로 찾아낸,
+     의미 없는(흐린 회색/흰색) 텍스트에 입히는 색. CSS 변수로 둬서 테마를
+     바꿀 때마다 JS를 다시 돌릴 필요 없이 이 값만 바뀌면 전부 같이
+     갱신된다. */
+  --ccfolia-muted-text: ${t.textPrimary};
 }
 
 /* ---- 룸 배경(보드/씬) — 의도적으로 배경색을 칠하지 않는다 ----
@@ -150,9 +155,48 @@ body {
 
 /* ---- 아이콘 전역 처리 ----
    [data-testid="ColorLensIcon"]: 캐릭터 색상 아이콘은 캐릭터마다 색이 바뀌는
-   동적 인라인 스타일이라 전역 규칙에서 제외한다. */
-.MuiSvgIcon-root:not([data-testid="ColorLensIcon"]) {
+   동적 인라인 스타일이라 전역 규칙에서 제외한다.
+   .Mui-disabled(자기 자신이거나 조상이거나 둘 다): 캐릭터 편집창의
+   "Standing Image / Difference" 목록처럼, "이미 선택됨"을 disabled 처리 +
+   옅은 색으로 표시하는 곳이 있다. 처음엔 그냥 이 상태를 안 건드리기만
+   했는데(exclude), ccfolia가 쓰는 원래 색(rgba(255,255,255,0.3), 30%
+   흰색)은 원본 다크 배경 기준이라 우리가 밝게 바꾼 배경에서는 그 자체가
+   거의 안 보인다. 그래서 여기선 그냥 제외만 하고, 실제 색은 아래 별도
+   규칙에서 우리 테마색의 옅은 버전으로 다시 지정한다. */
+.MuiSvgIcon-root:not([data-testid="ColorLensIcon"]):not(.Mui-disabled):not(.Mui-disabled *) {
   color: ${t.textPrimary} !important;
+}
+/* disabled로 표시되는 "이미 선택됨" 아이콘/아이콘버튼 전용 색.
+   ccfolia 원래 색(옅은 흰색)을 그대로 되살리면 밝은 프리셋에서 안 보이니,
+   우리 텍스트색을 낮은 불투명도로 써서 "다른 것보다 흐리다"는 느낌은
+   유지하면서 배경이 밝든 어둡든 실제로 보이게 한다. */
+.Mui-disabled.MuiSvgIcon-root,
+.Mui-disabled .MuiSvgIcon-root,
+.MuiIconButton-root.Mui-disabled {
+  color: rgba(${ccfoliaHexToRgb(t.textPrimary)}, 0.35) !important;
+}
+
+/* ---- 마우스 올렸을 때 강조(hover) 통일 ----
+   ccfolia 기본 호버 효과는 원래 다크 테마 기준으로 만들어진 흰색 반투명
+   오버레이(MUI의 action.hover)라서, 우리가 밝게 바꾼 목록/메뉴/아이콘
+   버튼 위에서는 거의 안 보인다. 반면 우리가 이미 배경/글자색을 직접
+   지정해둔 요소(AppBar 호버, 프리셋 버튼 등)는 자체 규칙이 있어 멀쩡해
+   보였던 것 — "어떤 건 강조되고 어떤 건 안 되는" 것처럼 보인 이유다.
+   자주 쓰이는 클릭형 컴포넌트 전반에 우리 테마 색 기반 반투명 호버를
+   깔아서 어디를 올리든 똑같이 강조되게 한다. */
+.MuiListItem-button:hover,
+.MuiMenuItem-root:hover,
+.MuiIconButton-root:hover {
+  background-color: rgba(${ccfoliaHexToRgb(t.textSecondary)}, 0.15) !important;
+}
+
+/* ---- "OO님이 입력 중..." 같은 채팅 타이핑 표시 ----
+   MuiTypography의 옅은 회색/흰색 caption 톤을 그대로 쓰는 것으로 보여서,
+   우리 밝은 배경 위에서 묻힌다. caption 변형 전반에 보조 텍스트 색을
+   입힌다. (이 요소를 직접 못 보고 짐작으로 잡은 셀렉터라 안 잡히면
+   알려달라 — 개발자 도구로 정확한 클래스를 찾아 다시 고치면 된다.) */
+.MuiTypography-caption {
+  color: ${t.textSecondary} !important;
 }
 
 /* ---- 떠 있는 패널들(채팅 하단 패널, Marker/Screen/Scene/Cut-in/캐릭터 목록 창 등) ----
@@ -232,9 +276,10 @@ body {
 
 /* ---- 다이얼로그 내부 아이콘 버튼 ----
    button 태그 전체에 걸면 DELETE/DUPLICATION 같은 의미색 텍스트 버튼까지
-   덮어쓰므로 아이콘/아이콘버튼만 타겟한다. */
-.MuiDialog-paper .MuiSvgIcon-root,
-.MuiDialog-paper .MuiIconButton-root {
+   덮어쓰므로 아이콘/아이콘버튼만 타겟한다. disabled(선택됨 표시 등)는
+   제외 — 실제 색은 위 "아이콘 전역 처리" 섹션의 전용 규칙이 맡는다. */
+.MuiDialog-paper .MuiSvgIcon-root:not(.Mui-disabled):not(.Mui-disabled *),
+.MuiDialog-paper .MuiIconButton-root:not(.Mui-disabled) {
   color: ${t.textPrimary} !important;
 }
 
@@ -337,6 +382,67 @@ function ccfoliaInjectStyle(theme) {
     (document.head || document.documentElement).appendChild(styleEl);
   }
   styleEl.textContent = ccfoliaBuildCSS(theme);
+  ccfoliaWatchChatText(theme && theme.enabled !== false);
+}
+
+/* ---- 흐린 회색/흰색 텍스트 자동 보정 ----
+   채팅 메시지 중엔(BCDice 주사위 식 풀이 등) CSS 클래스에 색이 박혀 있지만
+   그냥 원본 다크 테마용 흐린 회색/흰색(rgba(255,255,255,0.7) 등)일 뿐인
+   경우가 있다. 반면 성공/실패 같은 판정 결과는 의미 있는 채도 있는 색
+   (파랑/초록/빨강 등, 여러 명이 같이 보는 공유 데이터라 손대면 안 됨)을
+   쓴다. 문제는 이 둘이 구조적으로 구분이 안 된다는 것 — 둘 다 그냥 빌드마다
+   바뀌는 해시 클래스에 color 하나 박혀 있을 뿐이라 CSS 선택자로는 못
+   가른다. 대신 실제로 렌더링된 색의 채도를 JS로 계산해서, 채도가 거의
+   없는(R≈G≈B, 무채색) 것만 우리 테마색으로 바꾸고 채도가 있는 건 그대로
+   둔다. --ccfolia-muted-text CSS 변수를 쓰면 테마를 바꿀 때 이 함수를 다시
+   안 돌려도 색이 같이 갱신된다. */
+const CCFOLIA_ACHROMATIC_THRESHOLD = 12;
+
+function ccfoliaIsAchromatic(rgbString) {
+  const m = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/.exec(rgbString || "");
+  if (!m) return false;
+  const r = Number(m[1]);
+  const g = Number(m[2]);
+  const b = Number(m[3]);
+  return Math.max(r, g, b) - Math.min(r, g, b) <= CCFOLIA_ACHROMATIC_THRESHOLD;
+}
+
+function ccfoliaFixAchromaticSpans(root) {
+  const candidates = root.querySelectorAll(".MuiListItemText-secondary span:not([data-ccfolia-fixed])");
+  candidates.forEach((el) => {
+    el.setAttribute("data-ccfolia-fixed", "1");
+    if (ccfoliaIsAchromatic(getComputedStyle(el).color)) {
+      el.style.setProperty("color", "var(--ccfolia-muted-text)", "important");
+    }
+  });
+}
+
+let ccfoliaChatObserver = null;
+let ccfoliaChatScanTimer = null;
+
+function ccfoliaScheduleChatScan() {
+  if (ccfoliaChatScanTimer) return;
+  ccfoliaChatScanTimer = setTimeout(() => {
+    ccfoliaChatScanTimer = null;
+    ccfoliaFixAchromaticSpans(document.body || document.documentElement);
+  }, 150);
+}
+
+// "기본"(off) 프리셋이면 관찰을 꺼서 ccfolia 원본 모습에 아무것도 안
+// 건드린다. 채팅 드로어가 아직 안 떠 있을 수도 있어 body를 관찰 대상으로
+// 쓰되(document_start에 주입되므로), 디바운스로 과도한 재스캔을 막는다.
+function ccfoliaWatchChatText(enabled) {
+  if (ccfoliaChatObserver) {
+    ccfoliaChatObserver.disconnect();
+    ccfoliaChatObserver = null;
+  }
+  if (!enabled) return;
+  ccfoliaScheduleChatScan();
+  ccfoliaChatObserver = new MutationObserver(ccfoliaScheduleChatScan);
+  ccfoliaChatObserver.observe(document.body || document.documentElement, {
+    childList: true,
+    subtree: true,
+  });
 }
 
 function ccfoliaLoadAndApply() {
