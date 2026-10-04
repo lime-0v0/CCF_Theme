@@ -24,6 +24,11 @@ function ccfoliaBuildCSS(theme) {
 html,
 body {
   background-color: ${t.sidebarBg} !important;
+  /* --ccfolia-muted-text: ccfoliaFixAchromaticSpans()가 JS로 찾아낸,
+     의미 없는(흐린 회색/흰색) 텍스트에 입히는 색. CSS 변수로 둬서 테마를
+     바꿀 때마다 JS를 다시 돌릴 필요 없이 이 값만 바뀌면 전부 같이
+     갱신된다. */
+  --ccfolia-muted-text: ${t.textPrimary};
 }
 
 /* ---- 룸 배경(보드/씬) — 의도적으로 배경색을 칠하지 않는다 ----
@@ -377,6 +382,67 @@ function ccfoliaInjectStyle(theme) {
     (document.head || document.documentElement).appendChild(styleEl);
   }
   styleEl.textContent = ccfoliaBuildCSS(theme);
+  ccfoliaWatchChatText(theme && theme.enabled !== false);
+}
+
+/* ---- 흐린 회색/흰색 텍스트 자동 보정 ----
+   채팅 메시지 중엔(BCDice 주사위 식 풀이 등) CSS 클래스에 색이 박혀 있지만
+   그냥 원본 다크 테마용 흐린 회색/흰색(rgba(255,255,255,0.7) 등)일 뿐인
+   경우가 있다. 반면 성공/실패 같은 판정 결과는 의미 있는 채도 있는 색
+   (파랑/초록/빨강 등, 여러 명이 같이 보는 공유 데이터라 손대면 안 됨)을
+   쓴다. 문제는 이 둘이 구조적으로 구분이 안 된다는 것 — 둘 다 그냥 빌드마다
+   바뀌는 해시 클래스에 color 하나 박혀 있을 뿐이라 CSS 선택자로는 못
+   가른다. 대신 실제로 렌더링된 색의 채도를 JS로 계산해서, 채도가 거의
+   없는(R≈G≈B, 무채색) 것만 우리 테마색으로 바꾸고 채도가 있는 건 그대로
+   둔다. --ccfolia-muted-text CSS 변수를 쓰면 테마를 바꿀 때 이 함수를 다시
+   안 돌려도 색이 같이 갱신된다. */
+const CCFOLIA_ACHROMATIC_THRESHOLD = 12;
+
+function ccfoliaIsAchromatic(rgbString) {
+  const m = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/.exec(rgbString || "");
+  if (!m) return false;
+  const r = Number(m[1]);
+  const g = Number(m[2]);
+  const b = Number(m[3]);
+  return Math.max(r, g, b) - Math.min(r, g, b) <= CCFOLIA_ACHROMATIC_THRESHOLD;
+}
+
+function ccfoliaFixAchromaticSpans(root) {
+  const candidates = root.querySelectorAll(".MuiListItemText-secondary span:not([data-ccfolia-fixed])");
+  candidates.forEach((el) => {
+    el.setAttribute("data-ccfolia-fixed", "1");
+    if (ccfoliaIsAchromatic(getComputedStyle(el).color)) {
+      el.style.setProperty("color", "var(--ccfolia-muted-text)", "important");
+    }
+  });
+}
+
+let ccfoliaChatObserver = null;
+let ccfoliaChatScanTimer = null;
+
+function ccfoliaScheduleChatScan() {
+  if (ccfoliaChatScanTimer) return;
+  ccfoliaChatScanTimer = setTimeout(() => {
+    ccfoliaChatScanTimer = null;
+    ccfoliaFixAchromaticSpans(document.body || document.documentElement);
+  }, 150);
+}
+
+// "기본"(off) 프리셋이면 관찰을 꺼서 ccfolia 원본 모습에 아무것도 안
+// 건드린다. 채팅 드로어가 아직 안 떠 있을 수도 있어 body를 관찰 대상으로
+// 쓰되(document_start에 주입되므로), 디바운스로 과도한 재스캔을 막는다.
+function ccfoliaWatchChatText(enabled) {
+  if (ccfoliaChatObserver) {
+    ccfoliaChatObserver.disconnect();
+    ccfoliaChatObserver = null;
+  }
+  if (!enabled) return;
+  ccfoliaScheduleChatScan();
+  ccfoliaChatObserver = new MutationObserver(ccfoliaScheduleChatScan);
+  ccfoliaChatObserver.observe(document.body || document.documentElement, {
+    childList: true,
+    subtree: true,
+  });
 }
 
 function ccfoliaLoadAndApply() {
