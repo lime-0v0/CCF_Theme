@@ -382,7 +382,7 @@ function ccfoliaInjectStyle(theme) {
     (document.head || document.documentElement).appendChild(styleEl);
   }
   styleEl.textContent = ccfoliaBuildCSS(theme);
-  ccfoliaWatchChatText(theme && theme.enabled !== false);
+  ccfoliaWatchChatText(Object.assign({}, CCFOLIA_DEFAULT_THEME, theme));
 }
 
 /* ---- 흐린 회색/흰색 텍스트 자동 보정 ----
@@ -417,29 +417,69 @@ function ccfoliaFixAchromaticSpans(root) {
   });
 }
 
+/* ---- 캐릭터 발신자명(닉네임) 색 명도 보정 ----
+   발신자명 색은 캐릭터마다 다른 공유 데이터라 손대면 안 되지만(위 "채팅
+   메시지 발신자명" 참고), ccfolia가 원래 어두운 배경 기준으로 고른 색이
+   우리 밝은 프리셋 배경 위에서 아예 안 보이는 경우까지 봐주진 않는다.
+   색상(hue)·채도는 그대로 두고 명도만 배경 반대쪽으로 밀어서, "그 캐릭터
+   색"이라는 정체성은 유지하면서 최소한 읽히게 만든다(theme.js의
+   ccfoliaEnsureNicknameContrast). 원래 색을 data 속성에 저장해뒀다가, 테마를
+   바꿀 때마다 그 원래 색을 기준으로 다시 계산한다 — 조정폭은 현재 배경에
+   따라 달라지므로 한 번 조정한 값을 그대로 또 조정하면 안 된다. */
+function ccfoliaFixNicknameContrast(root, theme) {
+  const els = root.querySelectorAll(".MuiListItemText-primary");
+  els.forEach((el) => {
+    if (!el.dataset.ccfoliaNickOrig) {
+      el.dataset.ccfoliaNickOrig = getComputedStyle(el).color;
+    }
+    const m = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/.exec(el.dataset.ccfoliaNickOrig);
+    if (!m) return;
+    const [r, g, b] = ccfoliaEnsureNicknameContrast(Number(m[1]), Number(m[2]), Number(m[3]), theme.sidebarBg);
+    el.style.setProperty("color", `rgb(${r}, ${g}, ${b})`, "important");
+  });
+}
+
+// 확장을 끄면("기본" 프리셋) 조정했던 색을 원래 값으로 되돌린다 — 안 그러면
+// 나머지 테마는 다 원본으로 돌아갔는데 닉네임 색만 우리가 계산한 값으로
+// 남아있게 된다.
+function ccfoliaRestoreNicknames(root) {
+  root.querySelectorAll("[data-ccfolia-nick-orig]").forEach((el) => {
+    el.style.setProperty("color", el.dataset.ccfoliaNickOrig);
+  });
+}
+
 let ccfoliaChatObserver = null;
 let ccfoliaChatScanTimer = null;
+let ccfoliaCurrentTheme = CCFOLIA_DEFAULT_THEME;
 
 function ccfoliaScheduleChatScan() {
   if (ccfoliaChatScanTimer) return;
   ccfoliaChatScanTimer = setTimeout(() => {
     ccfoliaChatScanTimer = null;
-    ccfoliaFixAchromaticSpans(document.body || document.documentElement);
+    const root = document.body || document.documentElement;
+    ccfoliaFixAchromaticSpans(root);
+    ccfoliaFixNicknameContrast(root, ccfoliaCurrentTheme);
   }, 150);
 }
 
 // "기본"(off) 프리셋이면 관찰을 꺼서 ccfolia 원본 모습에 아무것도 안
 // 건드린다. 채팅 드로어가 아직 안 떠 있을 수도 있어 body를 관찰 대상으로
 // 쓰되(document_start에 주입되므로), 디바운스로 과도한 재스캔을 막는다.
-function ccfoliaWatchChatText(enabled) {
+function ccfoliaWatchChatText(theme) {
+  ccfoliaCurrentTheme = theme;
   if (ccfoliaChatObserver) {
     ccfoliaChatObserver.disconnect();
     ccfoliaChatObserver = null;
   }
-  if (!enabled) return;
-  ccfoliaScheduleChatScan();
+  const root = document.body || document.documentElement;
+  if (theme.enabled === false) {
+    ccfoliaRestoreNicknames(root);
+    return;
+  }
+  ccfoliaFixAchromaticSpans(root);
+  ccfoliaFixNicknameContrast(root, theme);
   ccfoliaChatObserver = new MutationObserver(ccfoliaScheduleChatScan);
-  ccfoliaChatObserver.observe(document.body || document.documentElement, {
+  ccfoliaChatObserver.observe(root, {
     childList: true,
     subtree: true,
   });
