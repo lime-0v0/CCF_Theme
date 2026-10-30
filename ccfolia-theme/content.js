@@ -422,20 +422,28 @@ function ccfoliaFixAchromaticSpans(root) {
    메시지 발신자명" 참고), ccfolia가 원래 어두운 배경 기준으로 고른 색이
    우리 밝은 프리셋 배경 위에서 아예 안 보이는 경우까지 봐주진 않는다.
    색상(hue)·채도는 그대로 두고 명도만 배경 반대쪽으로 밀어서, "그 캐릭터
-   색"이라는 정체성은 유지하면서 최소한 읽히게 만든다(theme.js의
-   ccfoliaEnsureNicknameContrast). 원래 색을 data 속성에 저장해뒀다가, 테마를
-   바꿀 때마다 그 원래 색을 기준으로 다시 계산한다 — 조정폭은 현재 배경에
-   따라 달라지므로 한 번 조정한 값을 그대로 또 조정하면 안 된다. */
+   색"이라는 정체성은 유지하면서 읽히게 만든다(theme.js의
+   ccfoliaEnsureNicknameContrast).
+   ccfolia의 채팅 목록은 가상 스크롤이라, 스크롤로 화면 밖에 나갔다 들어온
+   메시지는 DOM 노드가 재활용되면서 ccfolia가 원래 색을 다시 입힌다. "한 번
+   캐싱한 원본 색을 계속 믿는" 방식(예전 버전)이면 이미 우리가 조정해둔
+   값을 원본인 줄 알고 또 조정해버려서, 스크롤할 때마다 색이 점점 엉뚱하게
+   틀어졌다. 그래서 "원본"을 한 번만 캐싱하지 않고, 지금 보이는 색이
+   "우리가 마지막으로 적용한 값"과 다른지 매번 확인한다 — 다르면 ccfolia가
+   노드를 재활용하며 원래 색을 다시 입힌 것이므로 그 값을 새 원본으로 받고,
+   같으면(우리가 적용한 그대로 남아있으면) 저장해둔 원본을 계속 쓴다. */
 function ccfoliaFixNicknameContrast(root, theme) {
   const els = root.querySelectorAll(".MuiListItemText-primary");
   els.forEach((el) => {
-    if (!el.dataset.ccfoliaNickOrig) {
-      el.dataset.ccfoliaNickOrig = getComputedStyle(el).color;
+    const currentColor = getComputedStyle(el).color;
+    if (currentColor !== el.dataset.ccfoliaNickApplied) {
+      el.dataset.ccfoliaNickOrig = currentColor;
     }
     const m = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/.exec(el.dataset.ccfoliaNickOrig);
     if (!m) return;
     const [r, g, b] = ccfoliaEnsureNicknameContrast(Number(m[1]), Number(m[2]), Number(m[3]), theme.sidebarBg);
     el.style.setProperty("color", `rgb(${r}, ${g}, ${b})`, "important");
+    el.dataset.ccfoliaNickApplied = getComputedStyle(el).color;
   });
 }
 
