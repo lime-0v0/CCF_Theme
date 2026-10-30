@@ -417,6 +417,58 @@ function ccfoliaFixAchromaticSpans(root) {
   });
 }
 
+/* ---- 떠 있는 패널 안의 안 읽히는 텍스트 자동 보정 ----
+   HP/MP 텍스트, 주사위 판정값에 이어 세 번째로 같은 패턴이 나왔다 —
+   Marker/Scene 패널 같은 곳의 제목(.MuiTypography-subtitle2 등)이 ccfolia
+   원본 다크 테마 기준 흐린 흰색(rgb(245,245,245))으로 하드코딩돼 있어서
+   우리가 밝힌 패널 배경 위에서 안 보인다. 매번 특정 Typography 변형 하나씩
+   땜질하는 대신, 패널 안의 모든 텍스트 요소를 훑어서 "실제 렌더링된 글자색
+   vs 실제 렌더링된 배경색"의 대비를 직접 계산해 부족한 것만 고친다.
+   배경은 우리 테마의 sidebarBg라고 가정하지 않는다 — ccfolia 자체가 일부
+   영역(예: 이미지 캡션 바)엔 우리가 안 건드리는 고정 어두운 배경을 따로
+   깔아두기도 해서, 그런 곳은 흰 글자가 원래도 잘 보인다. 대신 가장 가까운
+   불투명(반투명 포함) 배경을 가진 조상까지 거슬러 올라가서 "진짜" 배경을
+   찾는다. */
+function ccfoliaParseRgb(str) {
+  const m = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?\)/.exec(str || "");
+  if (!m) return null;
+  return { r: Number(m[1]), g: Number(m[2]), b: Number(m[3]), a: m[4] === undefined ? 1 : Number(m[4]) };
+}
+
+function ccfoliaFindEffectiveBackground(el) {
+  let node = el;
+  while (node && node !== document.documentElement) {
+    const bg = ccfoliaParseRgb(getComputedStyle(node).backgroundColor);
+    if (bg && bg.a > 0.5) return bg;
+    node = node.parentElement;
+  }
+  return null;
+}
+
+const CCFOLIA_PANEL_TEXT_SELECTOR =
+  '.MuiPaper-elevation6:not(.MuiCard-root) [class*="MuiTypography-"], ' +
+  '.MuiDialog-paper [class*="MuiTypography-"], ' +
+  '.MuiPopover-paper:not(.MuiCard-root) [class*="MuiTypography-"], ' +
+  '.MuiMenu-paper:not(.MuiCard-root) [class*="MuiTypography-"], ' +
+  '.MuiDrawer-paper [class*="MuiTypography-"]';
+
+function ccfoliaFixPanelText(root) {
+  const candidates = root.querySelectorAll(CCFOLIA_PANEL_TEXT_SELECTOR);
+  candidates.forEach((el) => {
+    const currentColor = getComputedStyle(el).color;
+    if (currentColor === el.dataset.ccfoliaPanelApplied) return; // 우리가 지난번에 본/처리한 값 그대로면 다시 안 건드림
+    const textRgb = ccfoliaParseRgb(currentColor);
+    const bgRgb = ccfoliaFindEffectiveBackground(el);
+    if (!textRgb || !bgRgb) return;
+    const textLum = ccfoliaLuminanceFromChannels(textRgb.r, textRgb.g, textRgb.b);
+    const bgLum = ccfoliaLuminanceFromChannels(bgRgb.r, bgRgb.g, bgRgb.b);
+    if (ccfoliaContrastRatio(textLum, bgLum) < 3) {
+      el.style.setProperty("color", "var(--ccfolia-muted-text)", "important");
+    }
+    el.dataset.ccfoliaPanelApplied = getComputedStyle(el).color;
+  });
+}
+
 /* ---- 캐릭터 발신자명(닉네임) 색 명도 보정 ----
    발신자명 색은 캐릭터마다 다른 공유 데이터라 손대면 안 되지만(위 "채팅
    메시지 발신자명" 참고), ccfolia가 원래 어두운 배경 기준으로 고른 색이
@@ -467,6 +519,7 @@ function ccfoliaScheduleChatScan() {
     const root = document.body || document.documentElement;
     ccfoliaFixAchromaticSpans(root);
     ccfoliaFixNicknameContrast(root, ccfoliaCurrentTheme);
+    ccfoliaFixPanelText(root);
   }, 150);
 }
 
@@ -486,6 +539,7 @@ function ccfoliaWatchChatText(theme) {
   }
   ccfoliaFixAchromaticSpans(root);
   ccfoliaFixNicknameContrast(root, theme);
+  ccfoliaFixPanelText(root);
   ccfoliaChatObserver = new MutationObserver(ccfoliaScheduleChatScan);
   ccfoliaChatObserver.observe(root, {
     childList: true,
