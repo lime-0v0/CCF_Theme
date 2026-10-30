@@ -124,21 +124,117 @@ function ccfoliaExportTheme(theme) {
 // 읽힌다는 보장이 없다 — 예를 들어 밝은 글자색이 HP 게이지의 밝은 부분과
 // 겹치면 그대로 묻혀버린다. textPrimary의 명도를 보고 반대쪽 명도로 얇은
 // 테두리(outline)를 자동으로 골라서, 배경이 뭐든 항상 대비가 생기게 한다.
-function ccfoliaRelativeLuminance(hex) {
-  const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex || "");
-  if (!m) return 0;
+function ccfoliaLuminanceFromChannels(r, g, b) {
   const toLinear = (channel) => {
     const s = channel / 255;
     return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
   };
-  const r = toLinear(parseInt(m[1], 16));
-  const g = toLinear(parseInt(m[2], 16));
-  const b = toLinear(parseInt(m[3], 16));
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
+}
+
+function ccfoliaRelativeLuminance(hex) {
+  const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex || "");
+  if (!m) return 0;
+  return ccfoliaLuminanceFromChannels(parseInt(m[1], 16), parseInt(m[2], 16), parseInt(m[3], 16));
 }
 
 function ccfoliaAutoOutlineColor(textHex) {
   return ccfoliaRelativeLuminance(textHex) > 0.5 ? "rgba(0, 0, 0, 0.85)" : "rgba(255, 255, 255, 0.9)";
+}
+
+function ccfoliaContrastRatio(lumA, lumB) {
+  const lighter = Math.max(lumA, lumB);
+  const darker = Math.min(lumA, lumB);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+// RGB <-> HSL 변환. 캐릭터 발신자명 색을 "색상(hue)은 그대로 두고 명도(L)만"
+// 조정하려면 HSL이 필요하다 — RGB 채널을 직접 어둡게/밝게 하면 색감 자체가
+// 달라져 보일 수 있다.
+function ccfoliaRgbToHsl(r, g, b) {
+  r /= 255;
+  g /= 255;
+  b /= 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  let h = 0;
+  let s = 0;
+  const l = (max + min) / 2;
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r:
+        h = (g - b) / d + (g < b ? 6 : 0);
+        break;
+      case g:
+        h = (b - r) / d + 2;
+        break;
+      default:
+        h = (r - g) / d + 4;
+    }
+    h /= 6;
+  }
+  return [h, s, l];
+}
+
+function ccfoliaHslToRgb(h, s, l) {
+  if (s === 0) {
+    const v = Math.round(l * 255);
+    return [v, v, v];
+  }
+  const hue2rgb = (p, q, tRaw) => {
+    let t = tRaw;
+    if (t < 0) t += 1;
+    if (t > 1) t -= 1;
+    if (t < 1 / 6) return p + (q - p) * 6 * t;
+    if (t < 1 / 2) return q;
+    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+    return p;
+  };
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+  const p = 2 * l - q;
+  const r = hue2rgb(p, q, h + 1 / 3);
+  const g = hue2rgb(p, q, h);
+  const b = hue2rgb(p, q, h - 1 / 3);
+  return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+}
+
+// 캐릭터 발신자명 색은 사람마다 다르게 보이면 안 되는 공유 데이터라 함부로
+// 건드리면 안 되지만(위 "채팅 메시지 발신자명" 참고), ccfolia가 원래
+// 어두운 배경 기준으로 고른 색이 우리 밝은 프리셋에서는 아예 안 보이는
+// 경우까지 봐주진 않는다. 색상(hue)·채도(s)는 그대로 두고 명도(l)만 배경
+// 반대쪽으로 밀어서 "그 캐릭터 색"이라는 정체성은 유지한 채 읽히게 만든다.
+// "사람 눈에 얼마나 차이가 나야 보이는지"는 감으로 정하지 않고 WCAG 2.x의
+// 명도 대비비(contrast ratio, 일반 텍스트 AA 기준 4.5:1)를 그대로 가져다
+// 쓴다 — 이미 이 파일의 다른 보정(ccfoliaAutoOutlineColor 등)에도 쓰고
+// 있는 동일한 공식.
+const CCFOLIA_NICKNAME_MIN_CONTRAST = 4.5;
+const CCFOLIA_NICKNAME_LIGHTNESS_STEP = 0.02;
+
+function ccfoliaEnsureNicknameContrast(r, g, b, bgHex) {
+  const bgLum = ccfoliaRelativeLuminance(bgHex);
+  const lum = ccfoliaLuminanceFromChannels(r, g, b);
+  if (ccfoliaContrastRatio(lum, bgLum) >= CCFOLIA_NICKNAME_MIN_CONTRAST) {
+    return [r, g, b];
+  }
+  const [h, s, l] = ccfoliaRgbToHsl(r, g, b);
+  const darken = bgLum > 0.5;
+  let newL = l;
+  // 배경이 밝으면 바닥(0)까지, 어두우면 천장(1)까지만 밀 수 있다 -- 반대쪽
+  // 경계를 같이 검사하면(예전 버그) 흰색(l=1)을 한 칸 어둡게 하자마자
+  // "천장(0.9) 넘음"으로 오인해 거의 안 바뀐 채 멈춰버린다.
+  for (let i = 0; i < 60; i++) {
+    newL = darken ? Math.max(0, newL - CCFOLIA_NICKNAME_LIGHTNESS_STEP) : Math.min(1, newL + CCFOLIA_NICKNAME_LIGHTNESS_STEP);
+    const [nr, ng, nb] = ccfoliaHslToRgb(h, s, newL);
+    const newLum = ccfoliaLuminanceFromChannels(nr, ng, nb);
+    if (ccfoliaContrastRatio(newLum, bgLum) >= CCFOLIA_NICKNAME_MIN_CONTRAST) {
+      return [nr, ng, nb];
+    }
+    if (darken && newL <= 0) return [nr, ng, nb];
+    if (!darken && newL >= 1) return [nr, ng, nb];
+  }
+  return ccfoliaHslToRgb(h, s, newL);
 }
 
 function ccfoliaHexToRgb(hex) {
