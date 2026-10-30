@@ -204,10 +204,13 @@ function ccfoliaHslToRgb(h, s, l) {
 // 건드리면 안 되지만(위 "채팅 메시지 발신자명" 참고), ccfolia가 원래
 // 어두운 배경 기준으로 고른 색이 우리 밝은 프리셋에서는 아예 안 보이는
 // 경우까지 봐주진 않는다. 색상(hue)·채도(s)는 그대로 두고 명도(l)만 배경
-// 반대쪽으로 밀어서 "그 캐릭터 색"이라는 정체성은 유지한 채 최소한 읽히게
-// 만든다. 완전히 검/흰으로 밀어붙이면 색감이 없어지니 0.1~0.9 선에서 멈춘다.
-const CCFOLIA_NICKNAME_MIN_CONTRAST = 3;
-const CCFOLIA_NICKNAME_LIGHTNESS_STEP = 0.04;
+// 반대쪽으로 밀어서 "그 캐릭터 색"이라는 정체성은 유지한 채 읽히게 만든다.
+// "사람 눈에 얼마나 차이가 나야 보이는지"는 감으로 정하지 않고 WCAG 2.x의
+// 명도 대비비(contrast ratio, 일반 텍스트 AA 기준 4.5:1)를 그대로 가져다
+// 쓴다 — 이미 이 파일의 다른 보정(ccfoliaAutoOutlineColor 등)에도 쓰고
+// 있는 동일한 공식.
+const CCFOLIA_NICKNAME_MIN_CONTRAST = 4.5;
+const CCFOLIA_NICKNAME_LIGHTNESS_STEP = 0.02;
 
 function ccfoliaEnsureNicknameContrast(r, g, b, bgHex) {
   const bgLum = ccfoliaRelativeLuminance(bgHex);
@@ -218,13 +221,18 @@ function ccfoliaEnsureNicknameContrast(r, g, b, bgHex) {
   const [h, s, l] = ccfoliaRgbToHsl(r, g, b);
   const darken = bgLum > 0.5;
   let newL = l;
-  for (let i = 0; i < 20; i++) {
-    newL = darken ? Math.max(0.1, newL - CCFOLIA_NICKNAME_LIGHTNESS_STEP) : Math.min(0.9, newL + CCFOLIA_NICKNAME_LIGHTNESS_STEP);
+  // 배경이 밝으면 바닥(0)까지, 어두우면 천장(1)까지만 밀 수 있다 -- 반대쪽
+  // 경계를 같이 검사하면(예전 버그) 흰색(l=1)을 한 칸 어둡게 하자마자
+  // "천장(0.9) 넘음"으로 오인해 거의 안 바뀐 채 멈춰버린다.
+  for (let i = 0; i < 60; i++) {
+    newL = darken ? Math.max(0, newL - CCFOLIA_NICKNAME_LIGHTNESS_STEP) : Math.min(1, newL + CCFOLIA_NICKNAME_LIGHTNESS_STEP);
     const [nr, ng, nb] = ccfoliaHslToRgb(h, s, newL);
     const newLum = ccfoliaLuminanceFromChannels(nr, ng, nb);
-    if (ccfoliaContrastRatio(newLum, bgLum) >= CCFOLIA_NICKNAME_MIN_CONTRAST || newL <= 0.1 || newL >= 0.9) {
+    if (ccfoliaContrastRatio(newLum, bgLum) >= CCFOLIA_NICKNAME_MIN_CONTRAST) {
       return [nr, ng, nb];
     }
+    if (darken && newL <= 0) return [nr, ng, nb];
+    if (!darken && newL >= 1) return [nr, ng, nb];
   }
   return ccfoliaHslToRgb(h, s, newL);
 }
